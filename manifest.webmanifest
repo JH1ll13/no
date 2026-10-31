@@ -1,0 +1,18 @@
+{
+  "name": "Hidden Words Memorizer",
+  "short_name": "Hidden Words",
+  "description": "Memorize the Hidden Words of Bahá’u’lláh, from the Arabic and the Persian.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ECEFE9",
+  "theme_color": "#22407A",
+  "lang": "en",
+  "categories": ["education", "books"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
