@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beyond the Horizon — Voyages of the Age of Exploration</title>
+<meta name="description" content="Captain a caravel through uncharted waters with Dias, Columbus, da Gama and Magellan. An educational sailing game about the Age of Exploration.">
+<meta name="theme-color" content="#2b1d10">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23e9d8b0' stroke='%233b2a17' stroke-width='3'/%3E%3Cpath d='M32 6 L38 32 L32 58 L26 32Z' fill='%239b2d20'/%3E%3Cpath d='M6 32 L32 26 L58 32 L32 38Z' fill='%233b2a17'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="app">
+  <!-- Old-world map / menu background -->
+  <canvas id="mapCanvas"></canvas>
+  <!-- Sailing view -->
+  <canvas id="seaCanvas" class="hidden"></canvas>
+
+  <!-- ===== Title ===== -->
+  <section id="title" class="screen">
+    <div class="title-card">
+      <div class="title-kicker">An Age of Exploration Adventure</div>
+      <h1>Beyond the<br>Horizon</h1>
+      <div class="title-sub">Voyages into Uncharted Waters · 1487–1522</div>
+      <button id="btnBegin" class="btn big">Begin the Voyage</button>
+      <div class="title-hint">Best with sound on 🔊 · Keyboard, mouse or touch</div>
+    </div>
+  </section>
+
+  <!-- ===== Main menu (old-world map) ===== -->
+  <section id="menu" class="screen hidden">
+    <header class="menu-top">
+      <div class="cartouche">
+        <div class="cart-title">Typus Orbis Terrarum</div>
+        <div class="cart-sub">The World as Europe knew it · Anno Domini MCDXC</div>
+      </div>
+      <div class="menu-stats">
+        <div class="rank-box"><div id="rankName">Ship’s Boy</div><div class="xpbar"><i id="xpFill"></i></div></div>
+        <div class="ducats" title="Ducats"><span class="coin"></span><b id="menuDucats">0</b></div>
+        <button class="btn small" id="btnCodex">📜 Codex <span id="codexCount">0</span></button>
+        <button class="btn small" id="btnShipyard">⚓ Shipyard</button>
+        <button class="btn small icon" id="btnSettings" title="Settings">⚙</button>
+      </div>
+    </header>
+    <div class="map-legend" id="mapLegend"></div>
+    <footer class="explorers" id="explorerCards"></footer>
+  </section>
+
+  <!-- ===== Dossier ===== -->
+  <aside id="dossier" class="panel parchment hidden">
+    <button class="close" data-close="dossier">✕</button>
+    <div class="dossier-head">
+      <canvas id="dossierPortrait" width="180" height="180"></canvas>
+      <div>
+        <h2 id="dName"></h2>
+        <div class="d-alt" id="dAlt"></div>
+        <div class="d-tag" id="dTag"></div>
+        <div class="d-stars" id="dStars"></div>
+      </div>
+    </div>
+    <dl class="facts" id="dFacts"></dl>
+    <h3>Accomplishments</h3>
+    <ul id="dAcc" class="acc"></ul>
+    <div class="dossier-actions">
+      <button class="btn big" id="btnSetSail">⛵ Set Sail</button>
+      <button class="btn" id="btnContinue">Continue Voyage</button>
+    </div>
+  </aside>
+
+  <!-- ===== Royal letter / briefing ===== -->
+  <section id="briefing" class="screen dim hidden">
+    <div class="letter parchment">
+      <div class="seal"></div>
+      <div class="letter-body" id="letterBody"></div>
+      <div class="letter-place" id="letterPlace"></div>
+      <div class="controls-help">
+        <h3>How to Sail</h3>
+        <div class="ctl-grid">
+          <div><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd><kbd>←</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Steer North, East, South, West. Press two at once for NE, SE, SW, NW.</span></div>
+          <div><b class="ico">🧭</b><span>Or tap a point on the <b>compass rose</b> (bottom-left), or click &amp; hold on the sea to steer.</span></div>
+          <div><kbd>Space</kbd><span>Reef (shorten) sails — slower but safer in storms.</span></div>
+          <div><b class="ico">🌬</b><span>Sail <b>with</b> the wind for speed. Straight into the wind you barely move!</span></div>
+          <div><b class="ico">🐟</b><span>Fish = food. Rain squalls = fresh water. Bottles = Codex scrolls.</span></div>
+          <div><kbd>C</kbd> chart · <kbd>P</kbd> pause · <kbd>M</kbd> mute · <kbd>+</kbd>/<kbd>−</kbd> zoom</div>
+        </div>
+      </div>
+      <button class="btn big" id="btnHoist">Hoist the Sails!</button>
+    </div>
+  </section>
+
+  <!-- ===== HUD ===== -->
+  <section id="hud" class="hidden">
+    <div class="hud-left parchment-dark">
+      <canvas id="hudPortrait" width="84" height="84"></canvas>
+      <div class="hud-id">
+        <div id="hudCaptain" class="hud-cap"></div>
+        <div id="hudShip" class="hud-ship"></div>
+        <div id="hudDate" class="hud-date"></div>
+      </div>
+      <div class="bars">
+        <div class="bar" title="Food (hardtack, salted meat)"><span>🍞</span><i><b id="barFood"></b></i></div>
+        <div class="bar" title="Fresh water"><span>💧</span><i><b id="barWater"></b></i></div>
+        <div class="bar" title="Crew health"><span>❤️</span><i><b id="barHealth"></b></i></div>
+        <div class="bar" title="Crew morale"><span>😊</span><i><b id="barMorale"></b></i></div>
+        <div class="bar" title="Hull"><span>🪵</span><i><b id="barHull"></b></i></div>
+      </div>
+    </div>
+    <div class="hud-obj parchment-dark" id="hudObj">
+      <div class="obj-text" id="objText"></div>
+      <div class="obj-sub"><span id="objDist"></span> · <span id="objHint"></span></div>
+      <div class="obj-dots" id="objDots"></div>
+    </div>
+    <div class="hud-right">
+      <canvas id="miniMap" width="240" height="160"></canvas>
+      <div class="hud-meta parchment-dark">
+        <div><span class="lbl">Latitude</span> <b id="hudLat"></b> <small>(astrolabe)</small></div>
+        <div><span class="lbl">Longitude</span> <b id="hudLon"></b> <small>(dead reckoning)</small></div>
+        <div><span class="lbl">Speed</span> <b id="hudKnots"></b></div>
+        <div><span class="lbl">Heading</span> <b id="hudHeading"></b></div>
+        <div><span class="lbl">Codex</span> <b id="hudScrolls"></b> · <span class="coin sm"></span><b id="hudDucats"></b></div>
+      </div>
+    </div>
+    <div class="hud-compass">
+      <canvas id="compassPad" width="230" height="230"></canvas>
+      <div class="wind-text parchment-dark"><div id="windName"></div><div id="windDir"></div><div id="posSail"></div></div>
+    </div>
+    <div class="hud-buttons">
+      <button class="btn round" id="btnReef" title="Reef sails (Space)">⛵<small>Full sail</small></button>
+      <button class="btn round" id="btnChart" title="Chart (C)">🗺<small>Chart</small></button>
+      <button class="btn round" id="btnPause" title="Pause (P)">⏸<small>Pause</small></button>
+    </div>
+    <div id="toasts"></div>
+    <div id="banner" class="banner hidden"></div>
+  </section>
+
+  <!-- ===== Journal / event modal ===== -->
+  <section id="journal" class="screen dim hidden">
+    <div class="journal parchment">
+      <div class="j-date" id="jDate"></div>
+      <h2 id="jTitle"></h2>
+      <div class="j-place" id="jPlace"></div>
+      <canvas id="jScene" width="760" height="260"></canvas>
+      <div class="j-text" id="jText"></div>
+      <div class="j-terms" id="jTerms"></div>
+      <div class="j-quiz hidden" id="jQuiz"></div>
+      <div class="j-actions"><button class="btn big" id="jNext">Continue</button></div>
+    </div>
+  </section>
+
+  <!-- ===== Codex ===== -->
+  <section id="codex" class="screen dim hidden">
+    <div class="codex parchment">
+      <button class="close" data-close="codex">✕</button>
+      <h2>The Navigator’s Codex</h2>
+      <div class="codex-sub">Key terms of the Age of Exploration — collect them all on your voyages.</div>
+      <div class="codex-tabs" id="codexTabs"></div>
+      <div class="codex-grid" id="codexGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===== Card detail ===== -->
+  <section id="card" class="screen dim hidden">
+    <div class="term-card big parchment" id="cardBig"></div>
+  </section>
+
+  <!-- ===== Shipyard ===== -->
+  <section id="shipyard" class="screen dim hidden">
+    <div class="shipyard parchment">
+      <button class="close" data-close="shipyard">✕</button>
+      <h2>The Royal Shipyard</h2>
+      <div class="codex-sub">Spend your ducats to improve your caravel. Upgrades last for every voyage.</div>
+      <div class="ducats big"><span class="coin"></span><b id="yardDucats">0</b> ducats</div>
+      <div class="yard-list" id="yardList"></div>
+    </div>
+  </section>
+
+  <!-- ===== Chart overlay ===== -->
+  <section id="chart" class="screen dim hidden">
+    <div class="chart-wrap parchment">
+      <button class="close" data-close="chart">✕</button>
+      <h2>Your Chart</h2>
+      <canvas id="chartCanvas" width="1100" height="640"></canvas>
+      <div class="codex-sub">Your route so far. Grey mist marks uncharted waters.</div>
+    </div>
+  </section>
+
+  <!-- ===== Pause / settings ===== -->
+  <section id="pause" class="screen dim hidden">
+    <div class="pause parchment">
+      <h2 id="pauseTitle">Paused</h2>
+      <div class="sliders">
+        <label>Music <input type="range" min="0" max="1" step="0.05" id="volMusic"></label>
+        <label>Sound effects <input type="range" min="0" max="1" step="0.05" id="volSfx"></label>
+        <label>Ocean &amp; wind <input type="range" min="0" max="1" step="0.05" id="volAmb"></label>
+      </div>
+      <div class="pause-actions">
+        <button class="btn big" id="btnResume">Resume</button>
+        <button class="btn" id="btnQuit">Return to the World Map</button>
+        <button class="btn danger small" id="btnReset">Erase all progress</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Results ===== -->
+  <section id="results" class="screen dim hidden">
+    <div class="results parchment">
+      <div class="res-kicker">Voyage Complete</div>
+      <h2 id="resTitle"></h2>
+      <div class="res-stars" id="resStars"></div>
+      <canvas id="resChart" width="900" height="420"></canvas>
+      <div class="res-grid" id="resGrid"></div>
+      <div class="res-epilogue" id="resEpilogue"></div>
+      <div class="res-rank" id="resRank"></div>
+      <div class="j-actions"><button class="btn big" id="btnResDone">Return to the World Map</button></div>
+    </div>
+  </section>
+
+  <!-- ===== Game over ===== -->
+  <section id="gameover" class="screen dim hidden">
+    <div class="pause parchment">
+      <h2 id="goTitle"></h2>
+      <canvas id="goScene" width="560" height="200"></canvas>
+      <p id="goText"></p>
+      <div class="pause-actions">
+        <button class="btn big" id="btnRetry">Try Again from Last Port</button>
+        <button class="btn" id="btnGoMenu">Return to the World Map</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="loading" class="screen"><div class="loader"><div class="spin"></div><div>Charting the seas…</div></div></div>
+</div>
+
+<script src="js/geo-data.js"></script>
+<script src="js/util.js"></script>
+<script src="js/content.js"></script>
+<script src="js/world.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/art.js"></script>
+<script src="js/oldmap.js"></script>
+<script src="js/sailing.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
