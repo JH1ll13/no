@@ -244,7 +244,7 @@ const Game = (() => {
       Sail.render();
       miniT -= dt;
       if (miniT <= 0 && Sail.state) { miniT = 0.25; Sail.drawChart($('miniMap')); }
-    } else if (mode === 'menu' || mode === 'title') {
+    } else if ((mode === 'menu' || mode === 'title') && !Race.active) {
       if (knowAnim) {
         knowAnim.t += dt / 3.2;
         const k = U.easeInOut(Math.min(1, knowAnim.t));
@@ -345,6 +345,8 @@ const Game = (() => {
       toMenu();
     };
     $('btnCodex').onclick = () => { Sound.play('click'); UI.openCodex(); };
+    $('btnRace').onclick = () => { Sound.init(); Sound.play('click'); Race.openSetup(); };
+    Race.bind(() => { toMenu(); });
     $('btnShipyard').onclick = () => { Sound.play('click'); UI.openShipyard(); };
     $('btnSettings').onclick = () => { Sound.play('click'); openPause(true); };
     $('btnSetSail').onclick = () => { Sound.play('click'); startVoyage(UI.selected, false); };

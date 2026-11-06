@@ -29,6 +29,18 @@ Other keys: **C** opens the chart, **P** or **Esc** pauses, **M** mutes, and **+
 - **Key terms:** 76 cards in the Navigator's Codex, sorted into Ships, Navigation, Winds, Places, People and Big Ideas. Examples include caravel, astrolabe, dead reckoning, trade winds, volta do mar, padrão, scurvy, Treaty of Tordesillas, circumnavigation and the Columbian Exchange.
 - **People and outcomes:** each explorer's sponsor, ships, accomplishments and discoveries, and what happened next. This includes the Indigenous peoples they met (the Taíno, the Khoikhoi, Lapu-Lapu) and the consequences of the voyages.
 
+## Class Race: Race to the Spice Islands
+
+A whole-class game for the projector, opened with the **⚔ Class Race** button on the world map. The class splits into two crowns: **Portugal** sails east around Africa and **Spain** sails west across the Atlantic and Pacific, both racing to the Spice Islands, as they really did after the Treaty of Tordesillas.
+
+- Each round shows one question to both teams. Questions come from the game's content: geography and compass directions, key terms, and explorers and events.
+- Teams answer on mini whiteboards or through a captain. The teacher marks each team **Correct** or **Wrong**, then presses **Set Sail**.
+- Right answers bring fair winds, and three in a row brings a trade-wind surge. Wrong answers still move the ship, just slowly, so no team falls hopelessly behind.
+- Ships pass real milestones (Cape of Good Hope, Malindi, Strait of Magellan, the Pacific crossing and others). Each shows a short history card with a small boost or setback.
+- Settings: team names, race length (10, 15 or 20 questions), question types, and an optional 30-second timer.
+- Teacher keys: `1`/`2` Portugal right/wrong, `9`/`0` Spain right/wrong, `R` reveal the answer, `Enter` sail or next question.
+- No accounts, internet service or student data are needed; everything runs on the one computer connected to the projector.
+
 ## Rewards that keep students playing
 
 - **Stars (up to 3 per voyage):** one for finishing, one for answering 70% of the pilot's and the Crown's questions correctly, and one for finding 70% of the Codex scrolls.

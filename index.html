@@ -40,6 +40,7 @@
       <div class="menu-stats">
         <div class="rank-box"><div id="rankName">Ship’s Boy</div><div class="xpbar"><i id="xpFill"></i></div></div>
         <div class="ducats" title="Ducats"><span class="coin"></span><b id="menuDucats">0</b></div>
+        <button class="btn small race-btn" id="btnRace" title="Whole-class race: Spain vs. Portugal">⚔ Class Race</button>
         <button class="btn small" id="btnCodex">📜 Codex <span id="codexCount">0</span></button>
         <button class="btn small" id="btnShipyard">⚓ Shipyard</button>
         <button class="btn small icon" id="btnSettings" title="Settings">⚙</button>
@@ -52,18 +53,20 @@
   <!-- ===== Dossier ===== -->
   <aside id="dossier" class="panel parchment hidden">
     <button class="close" data-close="dossier">✕</button>
-    <div class="dossier-head">
-      <canvas id="dossierPortrait" width="180" height="180"></canvas>
-      <div>
-        <h2 id="dName"></h2>
-        <div class="d-alt" id="dAlt"></div>
-        <div class="d-tag" id="dTag"></div>
-        <div class="d-stars" id="dStars"></div>
+    <div class="dossier-scroll">
+      <div class="dossier-head">
+        <canvas id="dossierPortrait" width="180" height="180"></canvas>
+        <div>
+          <h2 id="dName"></h2>
+          <div class="d-alt" id="dAlt"></div>
+          <div class="d-tag" id="dTag"></div>
+          <div class="d-stars" id="dStars"></div>
+        </div>
       </div>
+      <dl class="facts" id="dFacts"></dl>
+      <h3>Accomplishments</h3>
+      <ul id="dAcc" class="acc"></ul>
     </div>
-    <dl class="facts" id="dFacts"></dl>
-    <h3>Accomplishments</h3>
-    <ul id="dAcc" class="acc"></ul>
     <div class="dossier-actions">
       <button class="btn big" id="btnSetSail">⛵ Set Sail</button>
       <button class="btn" id="btnContinue">Continue Voyage</button>
@@ -87,7 +90,7 @@
           <div><kbd>C</kbd> chart · <kbd>P</kbd> pause · <kbd>M</kbd> mute · <kbd>+</kbd>/<kbd>−</kbd> zoom</div>
         </div>
       </div>
-      <button class="btn big" id="btnHoist">Hoist the Sails!</button>
+      <div class="j-actions"><button class="btn big" id="btnHoist">Hoist the Sails!</button></div>
     </div>
   </section>
 
@@ -250,6 +253,81 @@
     </div>
   </section>
 
+
+  <!-- ===== Class Race: setup ===== -->
+  <section id="raceSetup" class="screen dim hidden">
+    <div class="race-setup parchment">
+      <div class="res-kicker">A whole-class game for the projector</div>
+      <h2>Race to the Spice Islands</h2>
+      <p class="rs-intro">Split the class into two crowns. <b>Portugal</b> sails east around Africa; <b>Spain</b> sails west across the Atlantic and Pacific. Each round, both teams answer the same question (on whiteboards or through a team captain). You mark each team right or wrong, and the ships sail. Right answers bring fair winds and streak bonuses; wrong answers still move, just slowly.</p>
+      <div class="rs-grid">
+        <div>
+          <h3>Team names</h3>
+          <label class="rs-field"><span class="rs-dot portugal"></span><input id="rsNameP" value="Portugal" maxlength="16" aria-label="Portugal team name"></label>
+          <label class="rs-field"><span class="rs-dot spain"></span><input id="rsNameS" value="Spain" maxlength="16" aria-label="Spain team name"></label>
+        </div>
+        <div>
+          <h3>Race length</h3>
+          <label class="rs-opt"><input type="radio" name="rsLen" value="10"> Short · 10 questions (about 10 min)</label>
+          <label class="rs-opt"><input type="radio" name="rsLen" value="15" checked> Standard · 15 questions (about 15 min)</label>
+          <label class="rs-opt"><input type="radio" name="rsLen" value="20"> Long · 20 questions (about 20 min)</label>
+        </div>
+        <div>
+          <h3>Question types</h3>
+          <label class="rs-opt"><input type="checkbox" id="rsGeo" checked> Geography &amp; directions</label>
+          <label class="rs-opt"><input type="checkbox" id="rsTerms" checked> Key terms</label>
+          <label class="rs-opt"><input type="checkbox" id="rsExp" checked> Explorers &amp; events</label>
+          <label class="rs-opt"><input type="checkbox" id="rsTimer"> 30-second timer</label>
+        </div>
+      </div>
+      <p class="rs-keys">Teacher shortcuts: <kbd>1</kbd>/<kbd>2</kbd> Portugal right/wrong · <kbd>9</kbd>/<kbd>0</kbd> Spain right/wrong · <kbd>R</kbd> reveal answer · <kbd>Enter</kbd> sail / next</p>
+      <div class="j-actions"><button class="btn" id="rsCancel">Cancel</button><button class="btn big" id="rsStart">⚔ Start the Race</button></div>
+    </div>
+  </section>
+
+  <!-- ===== Class Race: play ===== -->
+  <section id="race" class="hidden">
+    <div class="race-top">
+      <div class="race-title">Race to the Spice Islands</div>
+      <div class="race-round" id="rqRound"></div>
+      <button class="btn small" id="raceExit">✕ End race</button>
+    </div>
+    <div class="race-map"><canvas id="raceCanvas"></canvas><div id="raceCards"></div></div>
+    <div class="race-bottom">
+      <div class="race-team portugal">
+        <div class="rt-head"><canvas id="rf_portugal" class="rt-flag"></canvas><div><div class="rt-name" id="rn_portugal"></div><div class="rt-dir" id="rd_portugal"></div></div></div>
+        <div class="rt-bar"><i id="rp_portugal"></i><span id="rpc_portugal">0%</span></div>
+        <div class="rt-stat" id="rs_portugal"></div>
+        <div class="rt-btns"><button class="rt-yes" id="ry_portugal">✓ Correct</button><button class="rt-no" id="rx_portugal">✗ Wrong</button></div>
+      </div>
+      <div class="race-q parchment">
+        <div class="rq-chips"><span class="rq-cat" id="rqCat"></span><span class="rq-timer" id="rqTimer"></span></div>
+        <div class="rq-text" id="rqText"></div>
+        <div class="rq-opts" id="rqOpts"></div>
+        <div class="rq-explain" id="rqExplain"></div>
+        <div class="rq-actions"><button class="btn small ghost" id="rqSkip">Skip question</button><button class="btn small" id="rqReveal">Reveal answer</button><button class="btn" id="rqGo"></button></div>
+      </div>
+      <div class="race-team spain">
+        <div class="rt-head"><canvas id="rf_spain" class="rt-flag"></canvas><div><div class="rt-name" id="rn_spain"></div><div class="rt-dir" id="rd_spain"></div></div></div>
+        <div class="rt-bar"><i id="rp_spain"></i><span id="rpc_spain">0%</span></div>
+        <div class="rt-stat" id="rs_spain"></div>
+        <div class="rt-btns"><button class="rt-yes" id="ry_spain">✓ Correct</button><button class="rt-no" id="rx_spain">✗ Wrong</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Class Race: finish ===== -->
+  <section id="raceEnd" class="screen dim hidden">
+    <div class="race-end parchment">
+      <canvas id="reFlag" width="150" height="100"></canvas>
+      <h2 id="reTitle"></h2>
+      <div class="re-sub" id="reSub"></div>
+      <div class="re-stats" id="reStats"></div>
+      <div class="re-history"><b>What really happened:</b> The race was real. Portugal reached the Spice Islands first, in 1512, by sailing east around Africa. Magellan's Spanish fleet arrived from the west in 1521. Both crowns claimed the islands, because no one could measure longitude well enough to tell which side of the Tordesillas line they were on. In the Treaty of Zaragoza (1529), Spain gave up its claim in exchange for 350,000 ducats.</div>
+      <div class="j-actions"><button class="btn" id="reMenu">Back to the World Map</button><button class="btn big" id="reAgain">Race Again</button></div>
+    </div>
+  </section>
+
   <div id="loading" class="screen"><div class="loader"><div class="spin"></div><div>Charting the seas…</div></div></div>
 </div>
 
@@ -261,6 +339,7 @@
 <script src="js/art.js"></script>
 <script src="js/oldmap.js"></script>
 <script src="js/sailing.js"></script>
+<script src="js/race.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 </body>
