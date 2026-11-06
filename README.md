@@ -36,6 +36,20 @@ Other keys: **C** opens the chart, **P** or **Esc** pauses, **M** mutes, and **+
 - **Ranks:** Ship's Boy → Sailor → Pilot → Captain → Captain-Major → *Admiral of the Ocean Sea*.
 - **Saving:** progress is saved in the browser automatically. Voyages save at every landmark, so a student can stop at the end of class and continue next time.
 
+## Practice deck
+
+`practice/Beyond-the-Horizon-Practice.pptx` is a 40-slide PowerPoint that holds all of the practice for the unit, illustrated with art from the game. Students type their answers into the dashed boxes.
+
+Activities climb in difficulty:
+1. **Recall:** word banks, matching, Who Am I?, an explorer fact table and fill-in-the-blank.
+2. **Sort:** God, Gold or Glory; Portugal or Spain; navigation tools; cause or effect.
+3. **Geography lab (10 slides):** compass directions, continents and oceans, key places, latitude and longitude, wind belts, tracing routes, the 1490 vs. 1522 maps, and reading the in-game instruments.
+4. **Events:** a timeline, cause-and-effect chains, and matching game scenes to events.
+5. **Primary sources:** seven excerpts from published translations (Zurara, Columbus's journal and letter, da Gama's *Roteiro*, the Treaty of Tordesillas, Pigafetta, Las Casas), each with sourcing and close-reading questions, plus a corroboration task.
+6. **Claims:** a claim–evidence–reasoning model and two writing tasks, including a counterclaim.
+
+Answers are in each slide's speaker notes and on two answer-key slides.
+
 ## Running it
 
 This is a plain static website with no build step and no server code. All graphics, music and sound effects are generated in the browser.
