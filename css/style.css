@@ -162,6 +162,12 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 6px; margin: 0 2px; b
 .hud-obj { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); padding: 8px 18px; text-align: center; max-width: min(560px, calc(100vw - 660px)); min-width: 260px; }
 .obj-text { font-family: var(--fell-sc); font-size: 19px; color: #ffe8b5; }
 .obj-sub { font-size: 14px; opacity: .85; font-style: italic; }
+.obj-dots { display: flex; justify-content: center; align-items: center; gap: 4px; margin-top: 5px; }
+.obj-dots i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255, 230, 170, 0.6); background: transparent; }
+.obj-dots i.done { background: #f2d58a; }
+.obj-dots i.cur { background: #ffe9a0; box-shadow: 0 0 8px #ffd56a; animation: blink .7s infinite alternate; }
+.obj-dots i.fin { border-radius: 2px; transform: rotate(45deg); }
+.obj-dots b { flex: 0 0 8px; height: 1px; background: rgba(255, 230, 170, 0.35); }
 .hud-right { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
 #miniMap { width: 240px; height: 160px; border-radius: 6px; box-shadow: 0 0 0 2px #3b2a17, 0 0 0 4px rgba(242, 213, 138, 0.6), 0 6px 18px rgba(0, 0, 0, 0.5); cursor: pointer; }
 .hud-meta { padding: 7px 12px; font-size: 14px; width: 240px; }
@@ -243,6 +249,7 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 6px; margin: 0 2px; b
 .yard .yn { font-family: var(--fell-sc); font-size: 20px; }
 .yard .yd { font-size: 15px; }
 .yard .lv { color: #b07d1e; letter-spacing: 2px; }
+.yard .lv .off { color: rgba(80, 60, 30, 0.25); }
 .yard .btn { grid-column: 1 / -1; }
 .shipyard { text-align: center; }
 .shipyard .yard { text-align: left; }
@@ -287,6 +294,7 @@ input[type=range] { accent-color: #9b3a24; width: 100%; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
+  #toasts { top: 250px; }
   .hud-obj { top: auto; bottom: 250px; left: 50%; max-width: calc(100vw - 30px); }
   .hud-left { width: 250px; grid-template-columns: 64px 1fr; }
   .hud-left canvas { width: 64px; height: 64px; }

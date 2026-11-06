@@ -68,6 +68,19 @@ const Game = (() => {
   function drawMenuFrame(t) {
     if (!mapCache) return;
     const g = mapCanvas.getContext('2d');
+    if (mode === 'title') {
+      // slow drifting camera over the old map
+      const k = 1.06 + Math.sin(t * 0.12) * 0.03;
+      const w = mapCache.width, h = mapCache.height;
+      g.drawImage(mapCache, -(w * (k - 1)) / 2 + Math.sin(t * 0.09) * w * 0.02, -(h * (k - 1)) / 2 + Math.cos(t * 0.07) * h * 0.015, w * k, h * k);
+      // little ships crossing the Ocean Sea
+      for (let i = 0; i < 3; i++) {
+        const ph = (t * 0.018 + i / 3) % 1;
+        const x = w * (0.08 + ph * 0.84), y = h * (0.58 + i * 0.1) + Math.sin(t * 2 + i) * 2;
+        Art.shipSide(g, x, y, 0.2 * menuDpr, { dir: 1, sails: i === 1 ? 'square' : 'lateen' });
+      }
+      return;
+    }
     g.drawImage(mapCache, 0, 0);
     const ex = hoverEx || UI.selected;
     if (ex && mapProj) {
@@ -163,10 +176,10 @@ const Game = (() => {
     arrive: (wp, st, done) => {
       UI.journal(wp, st, done);
     },
-    nextLeg: (obj, st) => {
+    nextLeg: (obj, st, quiet) => {
       if (!obj) return;
       const legIdx = st.wpIndex;
-      const challenge = legIdx % 2 === 1 && obj.dist > 500 && !st.ex.waypoints[legIdx - 1].nextObj && !st.ex.waypoints[legIdx].obj;
+      const challenge = !quiet && st.ex.waypoints[legIdx].kind !== 'nav' && st.ex.waypoints[legIdx - 1].kind !== 'nav' && legIdx % 2 === 1 && obj.dist > 500 && !st.ex.waypoints[legIdx - 1].nextObj && !st.ex.waypoints[legIdx].obj;
       if (challenge) {
         Sail.pause(true);
         Sail.state.hideTarget = true;

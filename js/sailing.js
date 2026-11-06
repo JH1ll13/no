@@ -21,6 +21,7 @@ const Sail = (() => {
     fogC = U.canvas(Math.ceil(GEO.W * FOG_S), Math.ceil(GEO.H * FOG_S));
     fogG = fogC.getContext('2d');
     fogG.fillStyle = '#000'; fogG.fillRect(0, 0, fogC.width, fogC.height);
+    explored = null;
     if (!mistTex) {
       // tileable mist texture
       const N = 256; mistTex = U.canvas(N, N);
@@ -36,7 +37,21 @@ const Sail = (() => {
       g.putImageData(img, 0, 0);
     }
   }
+  const EXP_S = 1 / 64;
+  let explored = null, EXW = 0, EXH = 0;
+  function markExplored(x, y, r) {
+    if (!explored) { EXW = Math.ceil(GEO.W * EXP_S); EXH = Math.ceil(GEO.H * EXP_S); explored = new Uint8Array(EXW * EXH); }
+    const cx = GEO.wrapX(x) * EXP_S, cy = y * EXP_S, cr = r * 0.75 * EXP_S;
+    for (let j = Math.floor(cy - cr); j <= Math.ceil(cy + cr); j++) {
+      if (j < 0 || j >= EXH) continue;
+      for (let i = Math.floor(cx - cr); i <= Math.ceil(cx + cr); i++) {
+        if ((i - cx) ** 2 + (j - cy) ** 2 > cr * cr) continue;
+        explored[j * EXW + ((i % EXW) + EXW) % EXW] = 1;
+      }
+    }
+  }
   function reveal(x, y, r, strength = 1) {
+    markExplored(x, y, r);
     const fx = GEO.wrapX(x) * FOG_S, fy = y * FOG_S, fr = r * FOG_S;
     fogG.save();
     fogG.globalCompositeOperation = 'destination-out';
@@ -50,9 +65,10 @@ const Sail = (() => {
     fogG.restore();
   }
   function fogAt(x, y) {
-    const fx = Math.floor(GEO.wrapX(x) * FOG_S), fy = Math.floor(y * FOG_S);
-    if (fy < 0 || fy >= fogC.height) return 1;
-    return fogG.getImageData(fx, fy, 1, 1).data[3] / 255;
+    if (!explored) return 1;
+    const i = Math.floor(GEO.wrapX(x) * EXP_S), j = Math.floor(y * EXP_S);
+    if (j < 0 || j >= EXH) return 1;
+    return explored[j * EXW + i] ? 0 : 1;
   }
 
   /* ---------------- Wind model ----------------------------------------- */
@@ -430,7 +446,7 @@ const Sail = (() => {
     cam.x += GEO.dx(tx, cam.x) * Math.min(1, dt * 2.2);
     cam.y += (ty - cam.y) * Math.min(1, dt * 2.2);
     const nearLand = s.lastLandD < 260;
-    const zt = baseZoom() * cam.userZ * (nearLand ? 1.1 : 0.92) * (s.ex.id === 'magellan' && s.wpIndex >= 6 && s.wpIndex <= 7 ? 1.25 : 1);
+    const zt = baseZoom() * cam.userZ * (nearLand ? 1.1 : 0.92) * (s.ex.id === 'magellan' && s.wpIndex >= 6 && s.wpIndex <= 10 ? 1.25 : 1);
     cam.z += (zt - cam.z) * Math.min(1, dt * 0.8);
     cam.shake *= Math.pow(0.05, dt);
 
@@ -660,6 +676,15 @@ const Sail = (() => {
   /* ---------------- Waypoints & events --------------------------------- */
   function arrive(wp) {
     const s = st;
+    if (wp.kind === 'nav') {
+      // a channel marker: no journal, just keep sailing
+      Sound.play('bell');
+      toast(`🚩 ${wp.name} — ${wp.text || 'keep following the channel.'}`, 'good');
+      s.ducats += 5; s.wpIndex++;
+      Save.data.checkpoint = checkpoint(); Save.write();
+      hooks.nextLeg && hooks.nextLeg(objective(wp), s, true);
+      return;
+    }
     paused = true;
     s.ducats += 20; s.xp += 25;
     s.morale = Math.min(100, s.morale + 25);
@@ -737,6 +762,7 @@ const Sail = (() => {
   }
 
   /* ---------------- Rendering ------------------------------------------ */
+  let vignette = null;
   let waves = [], clouds = [], cloudSprite = null, causticTex = null, causticPat = null;
   function initWaves() {
     waves = [];
@@ -799,13 +825,13 @@ const Sail = (() => {
     if (!causticPat) causticPat = g.createPattern(causticTex, 'repeat');
     const wind = s.wind || { b: 0, s: 0.5 };
     const wv = vecFromBearing(wind.b, 1);
-    for (let k = 0; k < 2; k++) {
+    for (let k = 0; k < 1; k++) {
       const m = new DOMMatrix();
       const sc = z * (k ? 1.7 : 1.1);
       m.translateSelf(-cx * z * (k ? 1 : 1) + W / 2 + time * wv[0] * (k ? 9 : 5), -cy * z + H / 2 - time * wv[1] * (k ? 9 : 5));
       m.scaleSelf(sc, sc);
       causticPat.setTransform(m);
-      g.globalAlpha = k ? 0.16 : 0.26;
+      g.globalAlpha = 0.3;
       g.fillStyle = causticPat; g.fillRect(0, 0, W, H);
     }
     g.globalAlpha = 1;
@@ -993,10 +1019,15 @@ const Sail = (() => {
         g.restore();
       }
     }
-    // vignette
-    const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.max(W, H) * 0.78);
-    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(10,8,5,0.45)');
-    g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    // vignette (cached)
+    if (!vignette || vignette.width !== Math.ceil(W / 2) || vignette.height !== Math.ceil(H / 2)) {
+      vignette = U.canvas(Math.ceil(W / 2), Math.ceil(H / 2));
+      const vgc = vignette.getContext('2d'), w2 = vignette.width, h2 = vignette.height;
+      const vg = vgc.createRadialGradient(w2 / 2, h2 / 2, Math.min(w2, h2) * 0.45, w2 / 2, h2 / 2, Math.max(w2, h2) * 0.78);
+      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(10,8,5,0.45)');
+      vgc.fillStyle = vg; vgc.fillRect(0, 0, w2, h2);
+    }
+    g.drawImage(vignette, 0, 0, W, H);
   }
 
   function drawFog(g, cx, cy, z) {
@@ -1059,9 +1090,12 @@ const Sail = (() => {
       const p = GEO.toXY(la, lo);
       const sx = GEO.dx(p.x, cx) * z + W / 2, sy = (p.y - cy) * z + H / 2;
       if (sx < -300 || sx > W + 300 || sy < -50 || sy > H + 50) continue;
-      const fogA = fogAtCached(p.x, p.y);
-      const a = 1 - fogA;
-      if (a < 0.05) continue;
+      const key = t + la;
+      const seen = fogAtCached(p.x, p.y) < 0.5;
+      const prev = labelAlpha.get(key) || 0;
+      const a = seen ? Math.min(1, prev + 0.02) : 0;
+      labelAlpha.set(key, a);
+      if (a < 0.02) continue;
       if (kind === 'city' || kind === 'cape') {
         if (kind === 'city') { g.fillStyle = `rgba(150,30,20,${a})`; g.strokeStyle = `rgba(30,20,10,${a})`; g.lineWidth = 1.2; g.beginPath(); g.rect(sx - 4, sy - 4, 8, 8); g.fill(); g.stroke(); }
         else { g.fillStyle = `rgba(255,240,200,${a})`; g.beginPath(); g.arc(sx, sy, 3, 0, 7); g.fill(); }
@@ -1079,6 +1113,7 @@ const Sail = (() => {
       }
     }
   }
+  const labelAlpha = new Map();
   const fogCache = new Map(); let fogCacheT = 0;
   function fogAtCached(x, y) {
     if (time - fogCacheT > 1) { fogCache.clear(); fogCacheT = time; }

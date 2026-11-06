@@ -72,7 +72,7 @@ const UI = (() => {
       <dt>Ships</dt><dd>${ex.ships}</dd>
       <dt>Crew</dt><dd>${ex.crew}</dd>
       <dt>Mission</dt><dd>${ex.goal}</dd>
-      <dt>Stops</dt><dd>${ex.waypoints.length} landmarks · ${ex.scrolls.length} codex scrolls to find</dd>`;
+      <dt>Stops</dt><dd>${ex.waypoints.filter(w => w.kind !== 'nav').length} landmarks · ${ex.scrolls.length} codex scrolls to find</dd>`;
     const acc = $('dAcc');
     acc.innerHTML = ex.accomplishments.map(a => `<li>${a}</li>`).join('');
     acc.classList.toggle('locked', !v.done);
@@ -118,7 +118,8 @@ const UI = (() => {
     setBar('barFood', info.food); setBar('barWater', info.water); setBar('barHealth', info.health); setBar('barMorale', info.morale); setBar('barHull', info.hull);
     $('hudLat').textContent = U.fmtLat(info.lat);
     $('hudLon').textContent = '≈ ' + U.fmtLon(info.lon);
-    $('hudKnots').textContent = info.knots.toFixed(1) + ' knots' + (info.boost ? ' 💨' : '') + ' · heading ' + U.compass16Short(info.bearing);
+    $('hudKnots').textContent = info.knots.toFixed(1) + ' knots' + (info.boost ? ' 💨 fair winds!' : '');
+    $('hudHeading').textContent = U.compass16Short(info.bearing) + ' (' + Math.round(info.bearing) + '°)';
     $('hudScrolls').textContent = `${info.scrolls}/${info.scrollsTotal}`;
     $('hudDucats').textContent = ' ' + info.ducats;
     $('windName').textContent = '🌬 ' + (info.windName || 'Wind');
@@ -202,7 +203,19 @@ const UI = (() => {
     c.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); c.setPointerCapture(e.pointerId); pick(e); });
     c.addEventListener('pointermove', e => { if (e.buttons) pick(e); });
   }
+  function journeyDots() {
+    const st = Sail.state; if (!st) return;
+    const n = st.ex.waypoints.length;
+    let h = '';
+    for (let i = 0; i < n; i++) {
+      if (i) h += '<b></b>';
+      const cls = (i < st.wpIndex ? 'done' : i === st.wpIndex ? 'cur' : '') + (i === n - 1 ? ' fin' : '');
+      h += `<i class="${cls}" title="${st.ex.waypoints[i].name}"></i>`;
+    }
+    $('objDots').innerHTML = h;
+  }
   function objective(o) {
+    journeyDots();
     if (!o) return;
     $('objText').textContent = o.text;
     $('objHint').textContent = o.hint || '';
