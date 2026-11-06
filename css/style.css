@@ -266,6 +266,27 @@ input[type=range] { accent-color: #9b3a24; width: 100%; }
 #goScene { width: 100%; height: auto; margin: 10px 0; }
 #goText { font-size: 18px; }
 
+/* ---------- Report to the Crown ---------- */
+.royal { position: relative; width: min(860px, calc(100vw - 20px)); max-height: calc(100vh - 20px); overflow-y: auto; padding: 20px 30px 22px; animation: rise .45s ease; text-align: center; }
+.royal h2 { font-family: var(--deco); font-size: 34px; margin: 0 0 8px; color: #5a2a14; }
+.roy-stage { position: relative; }
+#royScene { width: 100%; height: auto; border-radius: 4px; display: block; }
+.roy-portraits { position: absolute; left: 0; right: 0; top: 6%; display: flex; justify-content: center; gap: 10px; }
+.roy-portraits canvas { width: 118px; height: 118px; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); animation: rise .6s ease both; }
+.roy-head { margin: 12px 0 6px; }
+.roy-name { font-family: var(--fell-sc); color: var(--red); letter-spacing: .1em; font-size: 15px; }
+.roy-say { font-size: 20px; line-height: 1.45; font-style: italic; min-height: 2.9em; }
+.roy-say b { font-style: normal; }
+.roy-pips { display: flex; justify-content: center; gap: 8px; margin: 6px 0; }
+.roy-pips i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #6b4a24; background: #f4e6c4; font-style: normal; font-size: 11px; line-height: 12px; color: #fff; }
+.roy-pips i.cur { box-shadow: 0 0 0 3px rgba(201, 151, 62, 0.6); }
+.roy-pips i.ok { background: #4a7a20; border-color: #2f5512; }
+.roy-pips i.no { background: #9b2d20; border-color: #5e1c0f; }
+.royal .j-quiz { text-align: left; }
+.roy-verdict { font-size: 22px; margin: 10px 0 4px; }
+.roy-verdict b { font-family: var(--fell-sc); font-size: 28px; display: block; color: #5a2a14; }
+.roy-score { font-size: 42px; color: #c9973e; letter-spacing: 6px; text-shadow: 0 2px 0 #6b4a24; }
+
 /* ---------- Results ---------- */
 .results { text-align: center; width: min(960px, calc(100vw - 20px)); }
 .res-kicker { font-family: var(--fell-sc); color: var(--red); letter-spacing: .2em; }

@@ -204,28 +204,35 @@ const Game = (() => {
   function finishVoyage(st) {
     mode = 'results';
     const ex = st.ex;
-    const S = Save.data;
-    const q = st.quizTotal ? st.quizRight / st.quizTotal : 1;
-    let stars = 1;
-    if (q >= 0.7) stars++;
-    if (st.scrolls.length >= Math.ceil(ex.scrolls.length * 0.7)) stars++;
-    const prev = S.voyages[ex.id] || {};
-    const firstTime = !prev.done;
-    const ducats = st.ducats + 100 + stars * 30;
-    const xp = st.xp + 150 + stars * 50 + (firstTime ? 100 : 0);
-    const oldRank = UI.rankFor(S.xp).r.t;
-    S.ducats += ducats; S.xp += xp;
-    const newRank = UI.rankFor(S.xp).r.t;
-    S.voyages[ex.id] = Object.assign(prev, { done: true, stars: Math.max(prev.stars || 0, stars) });
-    S.checkpoint = null;
-    Save.write();
     Sound.music('victory');
     UI.banner('Voyage Complete!', ex.waypoints[ex.waypoints.length - 1].name);
     setTimeout(() => {
-      UI.results(st, { stars, ducats, xp, rankUp: newRank !== oldRank ? newRank : null }, () => toMenu({ reveal: firstTime }));
-      if (newRank !== oldRank) setTimeout(() => Sound.play('rankup'), 1400);
       UI.hide('hud');
+      // the captain must first report to the monarch who paid for the voyage
+      UI.royalReport(st, report => awardVoyage(st, report));
     }, 1800);
+  }
+  function awardVoyage(st, report) {
+    const ex = st.ex;
+    const S = Save.data;
+    const asked = st.quizTotal + report.total, correct = st.quizRight + report.right;
+    const quizFrac = asked ? correct / asked : 1;
+    let stars = 1;
+    if (quizFrac >= 0.7) stars++;
+    if (st.scrolls.length >= Math.ceil(ex.scrolls.length * 0.7)) stars++;
+    const prev = S.voyages[ex.id] || {};
+    const firstTime = !prev.done;
+    const ducats = st.ducats + report.reward + 100 + stars * 30;
+    const xp = st.xp + report.right * 10 + 150 + stars * 50 + (firstTime ? 100 : 0);
+    const oldRank = UI.rankFor(S.xp).r.t;
+    S.ducats += ducats; S.xp += xp;
+    const newRank = UI.rankFor(S.xp).r.t;
+    S.voyages[ex.id] = Object.assign(prev, { done: true, stars: Math.max(prev.stars || 0, stars), report: Math.max(prev.report || 0, report.right) });
+    S.checkpoint = null;
+    Save.write();
+    Sound.music('victory');
+    UI.results(st, { stars, ducats, xp, quizFrac, report, rankUp: newRank !== oldRank ? newRank : null }, () => toMenu({ reveal: firstTime }));
+    if (newRank !== oldRank) setTimeout(() => Sound.play('rankup'), 1400);
   }
 
   /* ---------------- Loop ----------------------------------------------- */
@@ -253,7 +260,7 @@ const Game = (() => {
   }
 
   /* ---------------- Input ---------------------------------------------- */
-  function modalOpen() { return ['journal', 'codex', 'shipyard', 'chart', 'pause', 'results', 'gameover', 'card', 'briefing'].some(UI.isShown); }
+  function modalOpen() { return ['journal', 'codex', 'shipyard', 'chart', 'pause', 'royal', 'results', 'gameover', 'card', 'briefing'].some(UI.isShown); }
   function bindInput() {
     window.addEventListener('keydown', e => {
       Sound.init();

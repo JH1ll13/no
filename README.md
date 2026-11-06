@@ -19,6 +19,7 @@ Each completed voyage **redraws the world map** with what that explorer discover
 - **Explore.** The sea is covered in fog until you sail into it. Floating bottles hold **Codex scrolls** (key terms). Glowing wind streaks give a speed boost.
 - **Learn at each landmark.** Each stop opens a journal page with an illustration, the history of that moment, key-term cards and a question from the pilot. Some stops are *Captain's Decisions* that show what really happened.
 - **Pilot's Challenges** ask which compass direction leads to the next destination.
+- **Report to the Crown.** After the voyage, the student reports to the monarch who paid for it: King John II (Dias), Ferdinand & Isabella (Columbus), King Manuel I (da Gama) or King Charles I (Elcano reports for Magellan). The monarch asks six recall questions, four about the explorer and two key terms from that voyage, then gives a verdict and a reward.
 
 Other keys: **C** opens the chart, **P** or **Esc** pauses, **M** mutes, and **+**/**−** zoom.
 
@@ -30,7 +31,7 @@ Other keys: **C** opens the chart, **P** or **Esc** pauses, **M** mutes, and **+
 
 ## Rewards that keep students playing
 
-- **Stars (up to 3 per voyage):** one for finishing, one for answering 70% of the pilot's questions correctly, and one for finding 70% of the Codex scrolls.
+- **Stars (up to 3 per voyage):** one for finishing, one for answering 70% of the pilot's and the Crown's questions correctly, and one for finding 70% of the Codex scrolls.
 - **Ducats:** spend them at the Royal Shipyard on better sails, hull, hold, navigation kit and crew. Upgrades carry over to every voyage.
 - **Ranks:** Ship's Boy → Sailor → Pilot → Captain → Captain-Major → *Admiral of the Ocean Sea*.
 - **Saving:** progress is saved in the browser automatically. Voyages save at every landmark, so a student can stop at the end of class and continue next time.
