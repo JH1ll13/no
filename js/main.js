@@ -11,6 +11,7 @@ const Game = (() => {
   let last = performance.now();
   let miniT = 0;
   let currentEx = null;
+  let glyphPos = null;
 
   /* ---------------- Boot ----------------------------------------------- */
   function boot() {
@@ -82,14 +83,26 @@ const Game = (() => {
       return;
     }
     g.drawImage(mapCache, 0, 0);
+    // the Easter egg: a golden sun glyph in the New World, once the player is Admiral
+    glyphPos = null;
+    if (Bonus.unlocked() && mapProj && mode === 'menu') {
+      const [gx, gy] = mapProj.PW(-98.6, 19.6);
+      Bonus.drawGlyph(g, gx, gy, 10 * menuDpr, t);
+      glyphPos = [gx / menuDpr, gy / menuDpr];
+    }
     const ex = hoverEx || UI.selected;
     if (ex && mapProj) {
-      const pts = [[ex.start.lat, ex.start.lon], ...ex.waypoints.map(p => [p.lat, p.lon])].map(([la, lo]) => mapProj.PW(lo, la));
+      const ll = [[ex.start.lat, ex.start.lon], ...ex.waypoints.map(p => [p.lat, p.lon])];
+      const pts = ll.map(([la, lo]) => mapProj.PW(lo, la));
       g.save();
       g.lineCap = 'round'; g.lineJoin = 'round';
-      const path = new Path2D(); path.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < pts.length - 1; i++) { const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2; path.quadraticCurveTo(pts[i][0], pts[i][1], mx, my); }
-      path.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+      const path = new Path2D();
+      for (const part of OldMap.splitRoute(ll)) {
+        const pp = part.map(([la, lo]) => mapProj.PW(lo, la));
+        path.moveTo(pp[0][0], pp[0][1]);
+        for (let i = 1; i < pp.length - 1; i++) { const mx = (pp[i][0] + pp[i + 1][0]) / 2, my = (pp[i][1] + pp[i + 1][1]) / 2; path.quadraticCurveTo(pp[i][0], pp[i][1], mx, my); }
+        path.lineTo(pp[pp.length - 1][0], pp[pp.length - 1][1]);
+      }
       g.strokeStyle = 'rgba(255,248,225,0.85)'; g.lineWidth = 7 * menuDpr; g.stroke(path);
       g.strokeStyle = ex.color; g.lineWidth = 3.5 * menuDpr; g.setLineDash([10 * menuDpr, 8 * menuDpr]); g.lineDashOffset = -t * 30; g.stroke(path); g.setLineDash([]);
       pts.forEach(([x, y], i) => {
@@ -99,7 +112,8 @@ const Game = (() => {
       // little ship sailing the route
       const k = (t * 0.06) % 1, seg = k * (pts.length - 1), si = Math.floor(seg), f = seg - si;
       const a = pts[si], b = pts[Math.min(si + 1, pts.length - 1)];
-      const sx = a[0] + (b[0] - a[0]) * f, sy = a[1] + (b[1] - a[1]) * f;
+      const jump = Math.abs(ll[si][1] - ll[Math.min(si + 1, ll.length - 1)][1]) > 180;
+      const sx = jump ? a[0] : a[0] + (b[0] - a[0]) * f, sy = jump ? a[1] : a[1] + (b[1] - a[1]) * f;
       Art.shipSide(g, sx, sy + Math.sin(t * 3) * 1.5, 0.22 * menuDpr, { dir: b[0] >= a[0] ? 1 : -1, sails: 'lateen' });
       // label
       const [lx, ly] = pts[pts.length - 1];
@@ -131,12 +145,25 @@ const Game = (() => {
     legend.innerHTML = doneCount === 0
       ? '<b>The World in 1490</b><br>This is how Europeans pictured the world before the great voyages: Europe well known, Africa and Asia stretched and guessed at, an unknown southern land, mythical islands in the Ocean Sea—and no Americas at all.<br><br><i>Choose an explorer below. Each voyage you complete will redraw the map!</i>'
       : `<b>Your Map of the World</b><br>${doneCount} of 4 voyages completed. Each one has corrected Europe’s picture of the world.`;
+    if (doneCount === 4) legend.innerHTML = '<b>You have sailed the whole world!</b><br>All four voyages are complete and the map is redrawn. Sail them again for more stars, finish your Codex, or challenge the class to a race.' + (Save.data.admiral ? '<br><br><i>✦ A golden glyph glimmers in the New World… what could it be?</i>' : '');
+    $('btnHonors').classList.toggle('hidden', !Save.data.finaleSeen);
+    const allDone = doneCount === 4 && !Save.data.finaleSeen;
     if (opts.reveal) {
       animateKnowledge(knowNow, target, () => {
         UI.toast('🗺 The map of the world has been redrawn with your discoveries!', 'good');
+        if (allDone) setTimeout(() => playFinale(), 1800);
       });
       setTimeout(() => Sound.play('unlock'), 300);
-    } else { knowNow = target; renderMap(); }
+    } else {
+      knowNow = target; renderMap();
+      if (allDone) setTimeout(() => playFinale(), 600);
+    }
+  }
+  function playFinale() {
+    if (mode !== 'menu' || Finale.playing) return;
+    mode = 'finale';
+    UI.hide('dossier');
+    Finale.play(() => toMenu());
   }
 
   function startVoyage(ex, useCheckpoint) {
@@ -204,28 +231,35 @@ const Game = (() => {
   function finishVoyage(st) {
     mode = 'results';
     const ex = st.ex;
-    const S = Save.data;
-    const q = st.quizTotal ? st.quizRight / st.quizTotal : 1;
-    let stars = 1;
-    if (q >= 0.7) stars++;
-    if (st.scrolls.length >= Math.ceil(ex.scrolls.length * 0.7)) stars++;
-    const prev = S.voyages[ex.id] || {};
-    const firstTime = !prev.done;
-    const ducats = st.ducats + 100 + stars * 30;
-    const xp = st.xp + 150 + stars * 50 + (firstTime ? 100 : 0);
-    const oldRank = UI.rankFor(S.xp).r.t;
-    S.ducats += ducats; S.xp += xp;
-    const newRank = UI.rankFor(S.xp).r.t;
-    S.voyages[ex.id] = Object.assign(prev, { done: true, stars: Math.max(prev.stars || 0, stars) });
-    S.checkpoint = null;
-    Save.write();
     Sound.music('victory');
     UI.banner('Voyage Complete!', ex.waypoints[ex.waypoints.length - 1].name);
     setTimeout(() => {
-      UI.results(st, { stars, ducats, xp, rankUp: newRank !== oldRank ? newRank : null }, () => toMenu({ reveal: firstTime }));
-      if (newRank !== oldRank) setTimeout(() => Sound.play('rankup'), 1400);
       UI.hide('hud');
+      // the captain must first report to the monarch who paid for the voyage
+      UI.royalReport(st, report => awardVoyage(st, report));
     }, 1800);
+  }
+  function awardVoyage(st, report) {
+    const ex = st.ex;
+    const S = Save.data;
+    const asked = st.quizTotal + report.total, correct = st.quizRight + report.right;
+    const quizFrac = asked ? correct / asked : 1;
+    let stars = 1;
+    if (quizFrac >= 0.7) stars++;
+    if (st.scrolls.length >= Math.ceil(ex.scrolls.length * 0.7)) stars++;
+    const prev = S.voyages[ex.id] || {};
+    const firstTime = !prev.done;
+    const ducats = st.ducats + report.reward + 100 + stars * 30;
+    const xp = st.xp + report.right * 10 + 150 + stars * 50 + (firstTime ? 100 : 0);
+    const oldRank = UI.rankFor(S.xp).r.t;
+    S.ducats += ducats; S.xp += xp;
+    const newRank = UI.rankFor(S.xp).r.t;
+    S.voyages[ex.id] = Object.assign(prev, { done: true, stars: Math.max(prev.stars || 0, stars), report: Math.max(prev.report || 0, report.right) });
+    S.checkpoint = null;
+    Save.write();
+    Sound.music('victory');
+    UI.results(st, { stars, ducats, xp, quizFrac, report, rankUp: newRank !== oldRank ? newRank : null }, () => toMenu({ reveal: firstTime }));
+    if (newRank !== oldRank) setTimeout(() => Sound.play('rankup'), 1400);
   }
 
   /* ---------------- Loop ----------------------------------------------- */
@@ -237,7 +271,7 @@ const Game = (() => {
       Sail.render();
       miniT -= dt;
       if (miniT <= 0 && Sail.state) { miniT = 0.25; Sail.drawChart($('miniMap')); }
-    } else if (mode === 'menu' || mode === 'title') {
+    } else if ((mode === 'menu' || mode === 'title') && !Race.active) {
       if (knowAnim) {
         knowAnim.t += dt / 3.2;
         const k = U.easeInOut(Math.min(1, knowAnim.t));
@@ -253,7 +287,7 @@ const Game = (() => {
   }
 
   /* ---------------- Input ---------------------------------------------- */
-  function modalOpen() { return ['journal', 'codex', 'shipyard', 'chart', 'pause', 'results', 'gameover', 'card', 'briefing'].some(UI.isShown); }
+  function modalOpen() { return ['journal', 'codex', 'shipyard', 'chart', 'pause', 'royal', 'results', 'gameover', 'card', 'briefing'].some(UI.isShown); }
   function bindInput() {
     window.addEventListener('keydown', e => {
       Sound.init();
@@ -338,6 +372,19 @@ const Game = (() => {
       toMenu();
     };
     $('btnCodex').onclick = () => { Sound.play('click'); UI.openCodex(); };
+    $('btnRace').onclick = () => { Sound.init(); Sound.play('click'); Race.openSetup(); };
+    Race.bind(() => { toMenu(); });
+    Finale.bind();
+    $('btnHonors').onclick = () => { Sound.play('click'); playFinale(); };
+    Bonus.bind();
+    const overGlyph = e => glyphPos && Math.hypot(e.clientX - glyphPos[0], e.clientY - glyphPos[1]) < 24;
+    mapCanvas.addEventListener('pointermove', e => { mapCanvas.style.cursor = overGlyph(e) ? 'pointer' : ''; });
+    mapCanvas.addEventListener('pointerdown', e => {
+      if (mode !== 'menu' || !overGlyph(e)) return;
+      Sound.init(); Sound.play('unlock');
+      mode = 'bonus'; UI.hide('dossier'); UI.hide('menu');
+      Bonus.open(() => toMenu());
+    });
     $('btnShipyard').onclick = () => { Sound.play('click'); UI.openShipyard(); };
     $('btnSettings').onclick = () => { Sound.play('click'); openPause(true); };
     $('btnSetSail').onclick = () => { Sound.play('click'); startVoyage(UI.selected, false); };

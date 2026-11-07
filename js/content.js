@@ -518,3 +518,62 @@ const OLD_LABELS = [
   { t: 'Mare Mediterraneum', lat: 35.2, lon: 18, s: .55, sea: 1 }, { t: 'Oceanus Orientalis', lat: 20, lon: 150, s: .9, sea: 1 },
   { t: 'Sinus Magnus', lat: 10, lon: 120, s: .7, sea: 1 }, { t: 'Mare Æthiopicum', lat: -18, lon: -8, s: .85, sea: 1 },
 ];
+
+/* Report to the Crown: recall questions asked by the sponsoring monarch after each voyage.
+   The correct answer is listed first; the UI shuffles them. */
+const ROYAL = {
+  dias: {
+    court: 'The Royal Court, Lisbon · December 1488', monarchs: ['john2'], name: 'King John II of Portugal', flag: 'portugal', reporter: 'dias',
+    greeting: 'Welcome home, Captain Dias! Sixteen months you have been gone. Kneel, and tell your king what you have seen beyond the edge of our maps.',
+    questions: [
+      { q: 'Remind your king: which country sent you on this voyage?', a: ['Portugal', 'Spain', 'England', 'France'], x: 'Dias sailed for Portugal and King John II.' },
+      { q: 'What was the main goal of your voyage?', a: ['Find the southern end of Africa and a sea route toward India', 'Reach China by sailing west', 'Sail all the way around the world', 'Find gold in the Caribbean'], x: 'King John II wanted to know if ships could sail around Africa toward India.' },
+      { q: 'In what year did you sail around the southern tip of Africa?', a: ['1488', '1492', '1498', '1522'], x: 'Dias rounded the tip of Africa in early 1488.' },
+      { q: 'What did you name the great cape at the bottom of Africa?', a: ['The Cape of Storms', 'Cape Verde', 'Cape Horn', 'Cape Bojador'], x: 'Dias called it the Cape of Storms. King John II renamed it the Cape of Good Hope.' },
+      { q: 'Why did your ships turn back instead of sailing on to India?', a: ['The exhausted crew insisted on going home', 'The ships ran out of maps', 'A Spanish fleet attacked them', 'They had already reached India'], x: 'Dias’s officers voted to turn back near the Great Fish River.' },
+      { q: 'What stone markers did you place on the coast to claim it for Portugal?', a: ['Padrões', 'Pyramids', 'Lighthouses', 'Totem poles'], x: 'Padrões were stone pillars topped with a cross.' },
+      { q: 'Which explorer will use your discovery to reach India ten years later?', a: ['Vasco da Gama', 'Christopher Columbus', 'Ferdinand Magellan', 'Marco Polo'], x: 'Vasco da Gama followed Dias’s route around Africa to India in 1498.' },
+    ],
+  },
+  columbus: {
+    court: 'The Royal Court, Barcelona · April 1493', monarchs: ['isabella', 'ferdinand'], name: 'Queen Isabella & King Ferdinand of Spain', flag: 'castile', reporter: 'columbus',
+    greeting: 'Admiral Columbus! All of Spain is talking of your voyage. Our advisers said the Ocean Sea was too wide. Prove them wrong — tell us what you found.',
+    questions: [
+      { q: 'Which rulers paid for your voyage?', a: ['Ferdinand and Isabella of Spain', 'King John II of Portugal', 'King Manuel I of Portugal', 'King Charles I of Spain'], x: 'The Catholic Monarchs, Ferdinand and Isabella, sponsored Columbus in 1492.' },
+      { q: 'What were the names of your three ships?', a: ['Niña, Pinta and Santa María', 'Trinidad, Victoria and Concepción', 'São Gabriel, São Rafael and Berrio', 'Mayflower, Speedwell and Endeavour'], x: 'Columbus sailed with the Niña, the Pinta and the Santa María.' },
+      { q: 'In what year did you first reach the islands across the ocean?', a: ['1492', '1488', '1498', '1519'], x: 'Columbus reached the Bahamas on October 12, 1492.' },
+      { q: 'Where were you trying to go when you sailed west?', a: ['Asia — the Indies, China and Japan', 'The southern tip of Africa', 'The North Pole', 'Australia'], x: 'Columbus believed he could reach Asia by sailing west.' },
+      { q: 'What did you name the first island where you landed?', a: ['San Salvador', 'Cuba', 'Hispaniola', 'Madagascar'], x: 'The Taíno called it Guanahani; Columbus named it San Salvador.' },
+      { q: 'Which people greeted you on the islands?', a: ['The Taíno', 'The Aztecs', 'The Khoikhoi', 'The Inca'], x: 'The Taíno lived on the Caribbean islands.' },
+      { q: 'Which winds carried your ships west across the ocean?', a: ['The northeast trade winds', 'The westerlies', 'The monsoon', 'The doldrums'], x: 'The trade winds blew Columbus west; the westerlies carried him home.' },
+      { q: 'What happened to the Santa María?', a: ['It was wrecked on a reef on Christmas Eve', 'It was sold in Cuba', 'It sailed home first', 'It was captured by Portugal'], x: 'The Santa María ran aground off Hispaniola; its timbers built La Navidad.' },
+    ],
+  },
+  gama: {
+    court: 'The Royal Court, Lisbon · September 1499', monarchs: ['manuel'], name: 'King Manuel I of Portugal', flag: 'portugal', reporter: 'gama',
+    greeting: 'Captain-Major da Gama! Your ships are full of pepper and cinnamon. Portugal will be rich! Now tell your king how you found the road to India.',
+    questions: [
+      { q: 'Which country sent you to India?', a: ['Portugal', 'Spain', 'Venice', 'England'], x: 'Da Gama sailed for King Manuel I of Portugal.' },
+      { q: 'Which city in India did you reach?', a: ['Calicut', 'Beijing', 'Malacca', 'Baghdad'], x: 'Da Gama anchored at Calicut on May 20, 1498.' },
+      { q: 'In what year did you reach India?', a: ['1498', '1492', '1488', '1522'], x: 'Da Gama reached India in 1498.' },
+      { q: 'Around which continent did you sail to reach India?', a: ['Africa', 'South America', 'Australia', 'Asia'], x: 'Da Gama sailed around the Cape of Good Hope at the tip of Africa.' },
+      { q: 'Why did you swing far out into the open Atlantic?', a: ['To catch better winds (the volta do mar)', 'To escape pirates', 'To search for Brazil', 'Because the maps were wrong'], x: 'The volta do mar avoided headwinds and calms along Africa’s coast.' },
+      { q: 'Who guided your ships across the Arabian Sea to India?', a: ['An experienced pilot from Malindi', 'Christopher Columbus', 'The ruler of Mombasa', 'Prince Henry the Navigator'], x: 'The Sultan of Malindi provided a pilot who knew the monsoon winds.' },
+      { q: 'What goods did Portugal most want from India?', a: ['Spices such as pepper and cinnamon', 'Tobacco and potatoes', 'Furs and timber', 'Horses'], x: 'Spices were worth a fortune in Europe.' },
+    ],
+  },
+  magellan: {
+    court: 'The Royal Court, Valladolid · September 1522', monarchs: ['charles'], name: 'King Charles I of Spain', flag: 'spain', reporter: 'elcano',
+    greeting: 'Captain Elcano, only one ship and eighteen men of five ships have come home. Captain-General Magellan is dead. Tell your king — did you truly sail around the whole world?',
+    questions: [
+      { q: 'Magellan was born in Portugal. Which country did he sail for?', a: ['Spain', 'Portugal', 'England', 'Italy'], x: 'After Portugal’s king refused him, Magellan sailed for King Charles I of Spain.' },
+      { q: 'What had this expedition done that no one had done before?', a: ['Sailed all the way around the world', 'Reached India by sea', 'Reached the Americas', 'Sailed around the Cape of Good Hope'], x: 'It was the first circumnavigation of the Earth.' },
+      { q: 'Which two oceans does the Strait of Magellan connect?', a: ['The Atlantic and the Pacific', 'The Atlantic and the Indian', 'The Pacific and the Arctic', 'The Indian and the Pacific'], x: 'The strait at the tip of South America links the Atlantic and the Pacific.' },
+      { q: 'Why did Magellan name the Pacific Ocean the “Pacífico”?', a: ['Its waters seemed calm and peaceful', 'It was full of fish', 'It was named for a king', 'It means “enormous”'], x: '“Pacífico” means peaceful.' },
+      { q: 'Where was Magellan killed?', a: ['On Mactan, in the Philippines', 'In the Strait of Magellan', 'On Guam', 'At the Cape of Good Hope'], x: 'Magellan died at the Battle of Mactan in 1521, fighting Lapu-Lapu’s warriors.' },
+      { q: 'Which valuable spice filled the Victoria’s hold?', a: ['Cloves', 'Pepper', 'Saffron', 'Vanilla'], x: 'The cloves from the Spice Islands paid for the whole voyage.' },
+      { q: 'What did sailors suffer from when they had no fresh food for months?', a: ['Scurvy', 'Malaria', 'The plague', 'Seasickness'], x: 'Scurvy, caused by a lack of vitamin C, killed many of the crew.' },
+      { q: 'About how many of the roughly 270 men made it home?', a: ['18', '270', '150', '2'], x: 'Only 18 men returned on the Victoria in 1522.' },
+    ],
+  },
+};

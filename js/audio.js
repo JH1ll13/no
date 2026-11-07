@@ -168,7 +168,7 @@ const Sound = (() => {
   /* ---------------- Music ---------------------------------------------- */
   const CH = {   // chord tones (midi pitch classes as note names, root first)
     Dm: ['D', 'F', 'A'], A: ['A', 'C#', 'E'], C: ['C', 'E', 'G'], F: ['F', 'A', 'C'], G: ['G', 'B', 'D'], D: ['D', 'F#', 'A'],
-    Em: ['E', 'G', 'B'], Am: ['A', 'C', 'E'], Bb: ['Bb', 'D', 'F'], Gm: ['G', 'Bb', 'D'], E: ['E', 'G#', 'B'],
+    Em: ['E', 'G', 'B'], Am: ['A', 'C', 'E'], Bm: ['B', 'D', 'F#'], Bb: ['Bb', 'D', 'F'], Gm: ['G', 'Bb', 'D'], E: ['E', 'G#', 'B'],
   };
   const pc = name => NOTE[name];
   const nearestPc = (pcs, target) => { let best = target, bd = 99; for (let m = target - 7; m <= target + 7; m++) if (pcs.includes(((m % 12) + 12) % 12) && Math.abs(m - target) < bd) { bd = Math.abs(m - target); best = m; } return best; };
@@ -232,6 +232,22 @@ const Sound = (() => {
         drum(t, 0.7, 'low'); drum(t + B * 1.5, 0.4, 'low'); drum(t + B * 2, 0.6, 'low');
         for (let k = 0; k < 4; k++) drum(t + B * (3 + k * 0.25), 0.15 + k * 0.08, 'tabor');
         if (i % 2 === 1) brass(cm[0] + 24, t, B * 1.2, 0.3), brass(cm[2] + 24, t + B * 2, B * 1.5, 0.28);
+      },
+    },
+    grand: {
+      bpm: 76, beats: 4,
+      chords: ['D', 'G', 'D', 'A', 'Bm', 'G', 'A', 'D'],
+      mel: [['D5', 'F#5', 'A5', 'D6'], ['B5', 'A5', 'G5', 'B5'], ['A5', 'F#5', 'D6', 'A5'], ['E5', 'A5', 'C#6', 'E6'], ['D6', 'B5', 'F#5', 'B5'], ['G5', 'B5', 'D6', 'G6'], ['E6', 'C#6', 'A5', 'C#6'], ['D6', 'A5', 'F#5', 'D6']],
+      bar(i, t, B) {
+        const bi = i % 8, ch = this.chords[bi], cm = chordMidis(ch, 50);
+        drone([cm[0] - 12, cm[0] - 5], t, B * 4, 0.07);
+        lute(cm[0] - 12, t, 0.55, B * 4);
+        for (let k = 0; k < 8; k++) lute(cm[k % 3] + (k > 3 ? 12 : 0), t + k * B * 0.5, 0.24, B);
+        drum(t, 0.7, 'low'); drum(t + B * 2, 0.45, 'low');
+        if (bi === 7) for (let k = 0; k < 6; k++) drum(t + B * (3 + k / 6), 0.25 + k * 0.08, 'tabor');
+        this.mel[bi].forEach((p, k) => brass(n(p) - 12, t + k * B, B * 0.95, 0.3));
+        if (i % 16 >= 8) this.mel[bi].forEach((p, k) => recorder(n(p), t + k * B, B * 0.9, 0.3));
+        bell(cm[0] + 24, t, 0.25, _musicBusProxy(), 2.5);
       },
     },
     victory: {
@@ -483,6 +499,11 @@ const Sound = (() => {
     sail() { const t = ctx.currentTime; noiseHit(t, 800, 1, 0.3, 0.25, 'lowpass'); noiseHit(t + 0.1, 1600, 2, 0.12, 0.2); },
     thunder() { thunder(Math.random() * 0.6); },
     ship() { const t = ctx.currentTime; bell(n('E5'), t, 0.4); bell(n('E5'), t + 0.25, 0.3); },
+    firework() {
+      const t = ctx.currentTime;
+      noiseHit(t, 300, 0.6, 0.5, 0.6, 'lowpass');
+      for (let k = 0; k < 10; k++) noiseHit(t + 0.15 + Math.random() * 0.6, 3000 + Math.random() * 4000, 2, 0.08, 0.05, 'highpass');
+    },
     whale() {
       const t = ctx.currentTime;
       const o = ctx.createOscillator(); o.type = 'sine';
