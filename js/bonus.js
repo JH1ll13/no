@@ -32,7 +32,7 @@ const Bonus = (() => {
     { id: 'tenochtitlan', n: 'Tenochtitlan', lat: 19.43, lon: -99.13, date: 'November 8, 1519', title: 'The Meeting on the Causeway',
       text: 'On the great southern causeway, the emperor Moctezuma II comes out to greet Cortés, carried beneath a canopy of green feathers. Bernal Díaz later remembered the first sight of the city:',
       quote: '“…we were amazed and said that it was like the enchantments they tell of in the legend of Amadis, on account of the great towers and cues and buildings rising from the water, and all built of masonry. And some of our soldiers even asked whether the things that we saw were not a dream?”',
-      cite: 'Bernal Díaz del Castillo, The True History of the Conquest of New Spain (written c. 1568), trans. A. P. Maudslay (Hakluyt Society, 1908).',
+      cite: 'Bernal Díaz del Castillo, The True History of the Conquest of New Spain (written c. 1568), trans. A. P. Maudslay, vol. 2 (Hakluyt Society, 1910).',
       q: { q: 'Bernal Díaz wrote this about fifty years later, as an old man. How might that affect his account?', a: ['He might forget or exaggerate some details', 'It makes every detail perfectly accurate', 'He could not have seen the city', 'It means he was Mexica'], x: 'Historians value Díaz as an eyewitness but remember that memories fade and change over fifty years.' } },
   ];
   const MARCH_NOTES = [
