@@ -75,6 +75,16 @@ Activities climb in difficulty:
 
 Answers are in each slide's speaker notes and on two answer-key slides.
 
+## Lesson presentation
+
+`practice/Beyond-the-Horizon-Lessons.pptx` is a 37-slide teaching deck that comes before the game and the practice deck. It is split into five segments: Why Sail?; Ships, Stars and Winds; Around Africa; Across the Atlantic; Around the World. Each segment ends with a game voyage and the matching practice slides.
+
+- **Built on Mayer's multimedia principles:** maps and pictures carry the content, labels sit next to what they name, each slide makes one point, key terms come first, and the explanation is spoken from the notes instead of printed on the slide.
+- **Built on Bjork's desirable difficulties:** students predict before each reveal (the map pretest, the Columbus route), recall with notes closed at spaced points, and answer mixed questions about several explorers.
+- **Student participation:** badges mark each Turn & Talk, Check (hinge question), Predict, Recall and Write activity.
+- **Primary sources:** da Gama's *Roteiro*, Columbus's journal, the Treaty of Tordesillas and Pigafetta, each with sourcing questions.
+- **Teacher notes on every slide:** a script, timing, answers, common misconceptions and the reason for each design choice.
+
 ## Running it
 
 This is a plain static website with no build step and no server code. All graphics, music and sound effects are generated in the browser.
