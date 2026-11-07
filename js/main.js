@@ -11,6 +11,7 @@ const Game = (() => {
   let last = performance.now();
   let miniT = 0;
   let currentEx = null;
+  let glyphPos = null;
 
   /* ---------------- Boot ----------------------------------------------- */
   function boot() {
@@ -82,6 +83,13 @@ const Game = (() => {
       return;
     }
     g.drawImage(mapCache, 0, 0);
+    // the Easter egg: a golden sun glyph in the New World, once the player is Admiral
+    glyphPos = null;
+    if (Bonus.unlocked() && mapProj && mode === 'menu') {
+      const [gx, gy] = mapProj.PW(-98.6, 19.6);
+      Bonus.drawGlyph(g, gx, gy, 10 * menuDpr, t);
+      glyphPos = [gx / menuDpr, gy / menuDpr];
+    }
     const ex = hoverEx || UI.selected;
     if (ex && mapProj) {
       const ll = [[ex.start.lat, ex.start.lon], ...ex.waypoints.map(p => [p.lat, p.lon])];
@@ -137,7 +145,7 @@ const Game = (() => {
     legend.innerHTML = doneCount === 0
       ? '<b>The World in 1490</b><br>This is how Europeans pictured the world before the great voyages: Europe well known, Africa and Asia stretched and guessed at, an unknown southern land, mythical islands in the Ocean Sea—and no Americas at all.<br><br><i>Choose an explorer below. Each voyage you complete will redraw the map!</i>'
       : `<b>Your Map of the World</b><br>${doneCount} of 4 voyages completed. Each one has corrected Europe’s picture of the world.`;
-    if (doneCount === 4) legend.innerHTML = '<b>You have sailed the whole world!</b><br>All four voyages are complete and the map is redrawn. Sail them again for more stars, finish your Codex, or challenge the class to a race.';
+    if (doneCount === 4) legend.innerHTML = '<b>You have sailed the whole world!</b><br>All four voyages are complete and the map is redrawn. Sail them again for more stars, finish your Codex, or challenge the class to a race.' + (Save.data.admiral ? '<br><br><i>✦ A golden glyph glimmers in the New World… what could it be?</i>' : '');
     $('btnHonors').classList.toggle('hidden', !Save.data.finaleSeen);
     const allDone = doneCount === 4 && !Save.data.finaleSeen;
     if (opts.reveal) {
@@ -368,6 +376,15 @@ const Game = (() => {
     Race.bind(() => { toMenu(); });
     Finale.bind();
     $('btnHonors').onclick = () => { Sound.play('click'); playFinale(); };
+    Bonus.bind();
+    const overGlyph = e => glyphPos && Math.hypot(e.clientX - glyphPos[0], e.clientY - glyphPos[1]) < 24;
+    mapCanvas.addEventListener('pointermove', e => { mapCanvas.style.cursor = overGlyph(e) ? 'pointer' : ''; });
+    mapCanvas.addEventListener('pointerdown', e => {
+      if (mode !== 'menu' || !overGlyph(e)) return;
+      Sound.init(); Sound.play('unlock');
+      mode = 'bonus'; UI.hide('dossier'); UI.hide('menu');
+      Bonus.open(() => toMenu());
+    });
     $('btnShipyard').onclick = () => { Sound.play('click'); UI.openShipyard(); };
     $('btnSettings').onclick = () => { Sound.play('click'); openPause(true); };
     $('btnSetSail').onclick = () => { Sound.play('click'); startVoyage(UI.selected, false); };

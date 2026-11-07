@@ -342,6 +342,7 @@
       <p class="fa-text">You have sailed with Dias around Africa, with Columbus across the Ocean Sea, with da Gama to India, and with Magellan and Elcano around the whole world. The Crowns of Portugal and Spain name you <b>Admiral of the Ocean Sea</b>, the title Columbus himself was given.</p>
       <div class="fa-stats" id="faStats"></div>
       <p class="fa-gift">🎁 Your reward: a <b>golden caravel</b> for every future voyage, and 500 ducats from the royal treasury.</p>
+      <p class="fa-hint">✦ Sailors whisper that a golden glyph has appeared on your map, somewhere in the New World…</p>
       <label class="fa-name">Your name for the royal decree <input id="faName" maxlength="40" placeholder="Type your name"></label>
       <div class="j-actions"><button class="btn" id="faDone">Return to the World Map</button><button class="btn big" id="faCert">📜 Receive Your Royal Decree</button></div>
     </div>
@@ -350,6 +351,21 @@
     <div class="cert-wrap parchment">
       <canvas id="certCanvas" width="1600" height="1100"></canvas>
       <div class="j-actions"><button class="btn" id="certClose">Close</button><button class="btn" id="certPrint">🖨 Print</button><button class="btn big" id="certDownload">⬇ Download Certificate</button></div>
+    </div>
+  </section>
+
+
+  <!-- ===== Bonus Expedition (Easter egg) ===== -->
+  <section id="bonus" class="hidden">
+    <div class="bonus-top">
+      <div class="bonus-title">The Other Shore · Tenochtitlan 1519–1521</div>
+      <div class="bonus-chapter" id="bonusChapter"></div>
+      <div class="bonus-count" id="bonusCount"></div>
+      <button class="btn small" id="bonusExit">✕ Leave</button>
+    </div>
+    <div class="bonus-main">
+      <div class="bonus-stage"><canvas id="bonusCanvas"></canvas><div id="bonusToasts"></div></div>
+      <aside class="bonus-panel parchment" id="bonusPanel"></aside>
     </div>
   </section>
 
@@ -366,6 +382,7 @@
 <script src="js/sailing.js"></script>
 <script src="js/race.js"></script>
 <script src="js/finale.js"></script>
+<script src="js/bonus.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 </body>

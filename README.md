@@ -53,6 +53,12 @@ A whole-class game for the projector, opened with the **⚔ Class Race** button 
   - the student is named **Admiral of the Ocean Sea**, earns 500 bonus ducats and a golden caravel for every future voyage, and receives a royal decree certificate with their name to download or print
 
   The finale can be watched again from the **🏆 Honors** button.
+- **Secret bonus expedition:** after the finale, a golden sun glyph appears in the New World on the map. Clicking it opens *The Other Shore: Tenochtitlan, 1519–1521*.
+  - The student plays a young soldier on Cortés's expedition who keeps a chronicle. **There is no combat and nothing rewards conquest.**
+  - Chapters: building the chain of interpreters (Malintzin and Aguilar); the march inland past Cempoala, Tlaxcala, Cholula and the volcanoes; exploring Tenochtitlan's temples, market, chinampas, causeways and aqueduct; and the fall of the city, told through Spanish and Nahua voices.
+  - It ends with a "Why did Tenochtitlan fall?" reflection and an epilogue on the Nahua people and language today.
+  - The hard history (the Cholula massacre, smallpox, the siege) is told honestly and without graphic detail.
+  - It adds nine Codex terms and 200 ducats.
 - **Saving:** progress is saved in the browser automatically. Voyages save at every landmark, so a student can stop at the end of class and continue next time.
 
 ## Practice deck
