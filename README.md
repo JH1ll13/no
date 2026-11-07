@@ -46,6 +46,13 @@ A whole-class game for the projector, opened with the **⚔ Class Race** button 
 - **Stars (up to 3 per voyage):** one for finishing, one for answering 70% of the pilot's and the Crown's questions correctly, and one for finding 70% of the Codex scrolls.
 - **Ducats:** spend them at the Royal Shipyard on better sails, hull, hold, navigation kit and crew. Upgrades carry over to every voyage.
 - **Ranks:** Ship's Boy → Sailor → Pilot → Captain → Captain-Major → *Admiral of the Ocean Sea*.
+- **The grand finale:** finishing all four voyages plays a short celebration:
+  - the 1490 map redraws itself while the four routes are traced in order
+  - the routes glow on a spinning globe
+  - fireworks over the harbor
+  - the student is named **Admiral of the Ocean Sea**, earns 500 bonus ducats and a golden caravel for every future voyage, and receives a royal decree certificate with their name to download or print
+
+  The finale can be watched again from the **🏆 Honors** button.
 - **Saving:** progress is saved in the browser automatically. Voyages save at every landmark, so a student can stop at the end of class and continue next time.
 
 ## Practice deck
