@@ -285,7 +285,21 @@ const OldMap = (() => {
     g.restore();
   }
 
+  /** split a route wherever it jumps across the date line (Magellan's Pacific crossing) */
+  function splitRoute(points) {
+    const out = [[points[0]]];
+    for (let i = 1; i < points.length; i++) {
+      if (Math.abs(points[i][1] - points[i - 1][1]) > 180) out.push([]);
+      out[out.length - 1].push(points[i]);
+    }
+    return out.filter(s => s.length >= 2);
+  }
   function drawRoute(g, map, rt) {
+    const parts = splitRoute(rt.points);
+    if (parts.length > 1 || parts[0] !== rt.points) { for (const p of parts) drawRoutePart(g, map, Object.assign({}, rt, { points: p })); return; }
+    drawRoutePart(g, map, rt);
+  }
+  function drawRoutePart(g, map, rt) {
     const pts = rt.points.map(([la, lo]) => map.PW(lo, la));
     if (pts.length < 2) return;
     g.save();
@@ -321,5 +335,5 @@ const OldMap = (() => {
     return k;
   }
 
-  return { render, knowledgeFrom, setKnow(k) { know = Object.assign({}, know, k); }, get know() { return know; } };
+  return { splitRoute, render, knowledgeFrom, setKnow(k) { know = Object.assign({}, know, k); }, get know() { return know; } };
 })();

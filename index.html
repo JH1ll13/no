@@ -40,6 +40,7 @@
       <div class="menu-stats">
         <div class="rank-box"><div id="rankName">Ship’s Boy</div><div class="xpbar"><i id="xpFill"></i></div></div>
         <div class="ducats" title="Ducats"><span class="coin"></span><b id="menuDucats">0</b></div>
+        <button class="btn small honors-btn hidden" id="btnHonors" title="Your Admiral's honors">🏆 Honors</button>
         <button class="btn small race-btn" id="btnRace" title="Whole-class race: Spain vs. Portugal">⚔ Class Race</button>
         <button class="btn small" id="btnCodex">📜 Codex <span id="codexCount">0</span></button>
         <button class="btn small" id="btnShipyard">⚓ Shipyard</button>
@@ -328,6 +329,30 @@
     </div>
   </section>
 
+
+  <!-- ===== Grand Finale ===== -->
+  <section id="finale" class="hidden">
+    <canvas id="finaleCanvas"></canvas>
+    <div class="finale-caption" id="finaleCaption"></div>
+    <button class="btn small ghost finale-skip" id="finaleSkip">Skip ▸▸</button>
+    <div class="finale-award parchment hidden" id="finaleAward">
+      <div class="res-kicker">All four voyages complete</div>
+      <h2>Admiral of the Ocean Sea</h2>
+      <canvas id="faShip" width="420" height="260"></canvas>
+      <p class="fa-text">You have sailed with Dias around Africa, with Columbus across the Ocean Sea, with da Gama to India, and with Magellan and Elcano around the whole world. The Crowns of Portugal and Spain name you <b>Admiral of the Ocean Sea</b>, the title Columbus himself was given.</p>
+      <div class="fa-stats" id="faStats"></div>
+      <p class="fa-gift">🎁 Your reward: a <b>golden caravel</b> for every future voyage, and 500 ducats from the royal treasury.</p>
+      <label class="fa-name">Your name for the royal decree <input id="faName" maxlength="40" placeholder="Type your name"></label>
+      <div class="j-actions"><button class="btn" id="faDone">Return to the World Map</button><button class="btn big" id="faCert">📜 Receive Your Royal Decree</button></div>
+    </div>
+  </section>
+  <section id="certificate" class="screen dim hidden">
+    <div class="cert-wrap parchment">
+      <canvas id="certCanvas" width="1600" height="1100"></canvas>
+      <div class="j-actions"><button class="btn" id="certClose">Close</button><button class="btn" id="certPrint">🖨 Print</button><button class="btn big" id="certDownload">⬇ Download Certificate</button></div>
+    </div>
+  </section>
+
   <div id="loading" class="screen"><div class="loader"><div class="spin"></div><div>Charting the seas…</div></div></div>
 </div>
 
@@ -340,6 +365,7 @@
 <script src="js/oldmap.js"></script>
 <script src="js/sailing.js"></script>
 <script src="js/race.js"></script>
+<script src="js/finale.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 </body>

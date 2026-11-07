@@ -113,7 +113,7 @@ const Art = (() => {
     const hg = g.createLinearGradient(-W, 0, W, 0);
     hg.addColorStop(0, '#3e2412'); hg.addColorStop(0.5, '#8a5a32'); hg.addColorStop(1, '#3a2010');
     g.fillStyle = hg; g.fill(hull);
-    g.strokeStyle = '#1e1008'; g.lineWidth = 1.2; g.stroke(hull);
+    g.strokeStyle = o.gold ? '#e8b84a' : '#1e1008'; g.lineWidth = o.gold ? 2 : 1.2; g.stroke(hull);
     // deck
     g.save(); g.scale(0.8, 0.9);
     const dg = g.createLinearGradient(-W, 0, W, 0);
@@ -171,7 +171,8 @@ const Art = (() => {
         sp.lineTo(0, len * 0.45);
         sp.closePath();
         const sg = g.createLinearGradient(0, 0, bul, 0);
-        sg.addColorStop(0, '#fbf3df'); sg.addColorStop(1, '#d8c7a1');
+        if (o.gold) { sg.addColorStop(0, '#fff3c0'); sg.addColorStop(1, '#e0b44a'); }
+        else { sg.addColorStop(0, '#fbf3df'); sg.addColorStop(1, '#d8c7a1'); }
         g.fillStyle = sg; g.fill(sp);
         g.strokeStyle = 'rgba(60,40,20,0.7)'; g.lineWidth = 0.8; g.stroke(sp);
         // seams
@@ -193,7 +194,7 @@ const Art = (() => {
         const span = ml * 0.75 * reef, bul = -L * 0.12 * fill;
         const sp = new Path2D();
         sp.moveTo(-span / 2, 0); sp.quadraticCurveTo(0, bul * 2, span / 2, 0); sp.lineTo(span / 2 * 0.9, L * 0.03); sp.quadraticCurveTo(0, bul * 1.6 + L * 0.03, -span / 2 * 0.9, L * 0.03); sp.closePath();
-        g.fillStyle = '#efe3c6'; g.fill(sp); g.strokeStyle = 'rgba(60,40,20,0.7)'; g.lineWidth = 0.8; g.stroke(sp);
+        g.fillStyle = o.gold ? '#f3d27a' : '#efe3c6'; g.fill(sp); g.strokeStyle = 'rgba(60,40,20,0.7)'; g.lineWidth = 0.8; g.stroke(sp);
         if (o.cross !== false && mi === 1) {
           g.fillStyle = '#a3241b'; const cs = span * 0.12;
           g.fillRect(-cs * 0.2, bul * 1.2 - cs * 0.4, cs * 0.4, cs * 1.2); g.fillRect(-cs * 0.6, bul * 1.2 - cs * 0.05, cs * 1.2, cs * 0.35);

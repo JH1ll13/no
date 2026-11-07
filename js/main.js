@@ -84,12 +84,17 @@ const Game = (() => {
     g.drawImage(mapCache, 0, 0);
     const ex = hoverEx || UI.selected;
     if (ex && mapProj) {
-      const pts = [[ex.start.lat, ex.start.lon], ...ex.waypoints.map(p => [p.lat, p.lon])].map(([la, lo]) => mapProj.PW(lo, la));
+      const ll = [[ex.start.lat, ex.start.lon], ...ex.waypoints.map(p => [p.lat, p.lon])];
+      const pts = ll.map(([la, lo]) => mapProj.PW(lo, la));
       g.save();
       g.lineCap = 'round'; g.lineJoin = 'round';
-      const path = new Path2D(); path.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < pts.length - 1; i++) { const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2; path.quadraticCurveTo(pts[i][0], pts[i][1], mx, my); }
-      path.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+      const path = new Path2D();
+      for (const part of OldMap.splitRoute(ll)) {
+        const pp = part.map(([la, lo]) => mapProj.PW(lo, la));
+        path.moveTo(pp[0][0], pp[0][1]);
+        for (let i = 1; i < pp.length - 1; i++) { const mx = (pp[i][0] + pp[i + 1][0]) / 2, my = (pp[i][1] + pp[i + 1][1]) / 2; path.quadraticCurveTo(pp[i][0], pp[i][1], mx, my); }
+        path.lineTo(pp[pp.length - 1][0], pp[pp.length - 1][1]);
+      }
       g.strokeStyle = 'rgba(255,248,225,0.85)'; g.lineWidth = 7 * menuDpr; g.stroke(path);
       g.strokeStyle = ex.color; g.lineWidth = 3.5 * menuDpr; g.setLineDash([10 * menuDpr, 8 * menuDpr]); g.lineDashOffset = -t * 30; g.stroke(path); g.setLineDash([]);
       pts.forEach(([x, y], i) => {
@@ -99,7 +104,8 @@ const Game = (() => {
       // little ship sailing the route
       const k = (t * 0.06) % 1, seg = k * (pts.length - 1), si = Math.floor(seg), f = seg - si;
       const a = pts[si], b = pts[Math.min(si + 1, pts.length - 1)];
-      const sx = a[0] + (b[0] - a[0]) * f, sy = a[1] + (b[1] - a[1]) * f;
+      const jump = Math.abs(ll[si][1] - ll[Math.min(si + 1, ll.length - 1)][1]) > 180;
+      const sx = jump ? a[0] : a[0] + (b[0] - a[0]) * f, sy = jump ? a[1] : a[1] + (b[1] - a[1]) * f;
       Art.shipSide(g, sx, sy + Math.sin(t * 3) * 1.5, 0.22 * menuDpr, { dir: b[0] >= a[0] ? 1 : -1, sails: 'lateen' });
       // label
       const [lx, ly] = pts[pts.length - 1];
@@ -131,12 +137,25 @@ const Game = (() => {
     legend.innerHTML = doneCount === 0
       ? '<b>The World in 1490</b><br>This is how Europeans pictured the world before the great voyages: Europe well known, Africa and Asia stretched and guessed at, an unknown southern land, mythical islands in the Ocean Sea—and no Americas at all.<br><br><i>Choose an explorer below. Each voyage you complete will redraw the map!</i>'
       : `<b>Your Map of the World</b><br>${doneCount} of 4 voyages completed. Each one has corrected Europe’s picture of the world.`;
+    if (doneCount === 4) legend.innerHTML = '<b>You have sailed the whole world!</b><br>All four voyages are complete and the map is redrawn. Sail them again for more stars, finish your Codex, or challenge the class to a race.';
+    $('btnHonors').classList.toggle('hidden', !Save.data.finaleSeen);
+    const allDone = doneCount === 4 && !Save.data.finaleSeen;
     if (opts.reveal) {
       animateKnowledge(knowNow, target, () => {
         UI.toast('🗺 The map of the world has been redrawn with your discoveries!', 'good');
+        if (allDone) setTimeout(() => playFinale(), 1800);
       });
       setTimeout(() => Sound.play('unlock'), 300);
-    } else { knowNow = target; renderMap(); }
+    } else {
+      knowNow = target; renderMap();
+      if (allDone) setTimeout(() => playFinale(), 600);
+    }
+  }
+  function playFinale() {
+    if (mode !== 'menu' || Finale.playing) return;
+    mode = 'finale';
+    UI.hide('dossier');
+    Finale.play(() => toMenu());
   }
 
   function startVoyage(ex, useCheckpoint) {
@@ -347,6 +366,8 @@ const Game = (() => {
     $('btnCodex').onclick = () => { Sound.play('click'); UI.openCodex(); };
     $('btnRace').onclick = () => { Sound.init(); Sound.play('click'); Race.openSetup(); };
     Race.bind(() => { toMenu(); });
+    Finale.bind();
+    $('btnHonors').onclick = () => { Sound.play('click'); playFinale(); };
     $('btnShipyard').onclick = () => { Sound.play('click'); UI.openShipyard(); };
     $('btnSettings').onclick = () => { Sound.play('click'); openPause(true); };
     $('btnSetSail').onclick = () => { Sound.play('click'); startVoyage(UI.selected, false); };

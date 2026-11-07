@@ -934,7 +934,7 @@ const Sail = (() => {
       Art.shipTop(g, {
         len: main ? 52 : 44, sailAngle: trim, fill: U.clamp(wind.s * (Math.abs(r) < 150 ? 1 : 0.4), 0.15, 1), reefed: main ? st.ship.reefed : false,
         t: time + x * 0.01, pennantAngle: U.rad(r) + Math.PI, night: night > 0.5, square: isSq,
-        pennant: main ? st.ex.color : '#a3241b',
+        pennant: main ? st.ex.color : '#a3241b', gold: main && !!Save.data.admiral,
       });
       g.restore();
       if (main || z > 0.8) {
