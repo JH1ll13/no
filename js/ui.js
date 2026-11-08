@@ -415,6 +415,89 @@ const UI = (() => {
     }
   }
 
+  /* ---------------- Report to the Crown -------------------------------- */
+  const PRAISE = ['Excellent! Just as I hoped.', 'Well answered, Captain.', 'Splendid! My scholars will write that down.', 'Yes! You have served the Crown well.', 'Precisely so.'];
+  const DOUBT = ['Hmm… that is not what my scholars wrote.', 'Are you certain, Captain? Let me correct you.', 'No, no — listen carefully.', 'That does not sound right to me.'];
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function termQuestion(id, pool) {
+    const T = TERMS[id];
+    let def = T.d;
+    const words = [T.t.replace(/\s*\(.*\)/, ''), ...T.t.replace(/[()]/g, '').split(/\s+|&/).filter(w => w.length >= 6)];
+    for (const w of words) def = def.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '_____');
+    const others = shuffle(Object.keys(TERMS).filter(k => k !== id && TERMS[k].cat === T.cat && !pool.includes(k))).concat(shuffle(pool.filter(k => k !== id)));
+    const wrong = [];
+    for (const k of others) { if (wrong.length >= 3) break; if (!wrong.includes(TERMS[k].t) && TERMS[k].t !== T.t) wrong.push(TERMS[k].t); }
+    const lead = T.cat === 'people' ? 'Tell me — who is this?' : T.cat === 'place' ? 'Tell me — which place is this?' : 'A new word for my court! Which term means this?';
+    return { q: `${lead} <i>“${def}”</i>`, a: [T.t, ...wrong], x: `<b>${T.t}:</b> ${T.d}`, term: true };
+  }
+  function royalReport(st, done) {
+    const ex = st.ex, R = ROYAL[ex.id];
+    $('royCourt').textContent = R.court;
+    $('royName').textContent = R.name;
+    Art.throneRoom($('royScene'), R.flag, R.monarchs.length);
+    const pw = $('royPortraits'); pw.innerHTML = '';
+    for (const m of R.monarchs) { const c = U.canvas(236, 236); Art.portrait(c.getContext('2d'), m, 236, { bg1: '#f3e2b5', bg2: '#9a6a2a' }); pw.appendChild(c); }
+    // build the questions: four about the explorer, two about key terms from this voyage
+    const facts = shuffle(R.questions).slice(0, 4);
+    const pool = [...new Set(ex.waypoints.flatMap(w => w.terms || []))];
+    const terms = shuffle(pool).slice(0, 2).map(id => termQuestion(id, pool));
+    const qs = [...facts, ...terms];
+    let i = -1, right = 0;
+    const pips = $('royPips');
+    const drawPips = () => { pips.innerHTML = qs.map((q, k) => `<i class="${q.res === true ? 'ok' : q.res === false ? 'no' : ''}${k === i ? ' cur' : ''}"></i>`).join(''); };
+    const say = h => { $('roySay').innerHTML = h; };
+    const reporter = CAPTAIN_NAMES[R.reporter];
+    say(`“${R.greeting}”`);
+    pips.innerHTML = '';
+    const qbox = $('royQ'); qbox.classList.add('hidden'); qbox.innerHTML = '';
+    const next = $('royNext');
+    next.disabled = false; next.textContent = `Begin ${reporter.split(' ').slice(-1)[0]}’s Report`;
+    show('royal'); $('royal').scrollTop = 0;
+    Sound.music('title'); Sound.play('bell');
+    const ask = () => {
+      i++;
+      if (i >= qs.length) return finish();
+      const q = qs[i];
+      drawPips();
+      say(q.term ? '“Explain this to me, Captain…”' : `“Question ${i + 1} of ${qs.length}…”`);
+      const opts = shuffle(q.a.map((t, k) => ({ t, ok: k === 0 })));
+      qbox.classList.remove('hidden');
+      qbox.innerHTML = `<div class="qk">👑 ${q.term ? 'THE CROWN ASKS ABOUT A KEY TERM' : 'THE CROWN ASKS'}</div><div class="qq">${q.q}</div><div class="opts"></div><div class="qx"></div>`;
+      const ob = qbox.querySelector('.opts');
+      next.disabled = true; next.textContent = i === qs.length - 1 ? 'Hear the Royal Verdict' : 'Next Question';
+      opts.forEach((o, k) => {
+        const b = U.el('button', 'opt', o.t);
+        b.onclick = () => {
+          ob.querySelectorAll('.opt').forEach(x => { x.disabled = true; });
+          ob.children[opts.findIndex(x => x.ok)].classList.add('right');
+          if (!o.ok) b.classList.add('wrong');
+          q.res = o.ok; if (o.ok) right++;
+          Sound.play(o.ok ? 'correct' : 'wrong');
+          say(`“${U.pick(o.ok ? PRAISE : DOUBT)}”`);
+          qbox.querySelector('.qx').innerHTML = (o.ok ? '<b>Correct!</b> ' : '<b>The answer:</b> ') + q.x;
+          drawPips();
+          next.disabled = false;
+        };
+        ob.appendChild(b);
+        void k;
+      });
+    };
+    const finish = () => {
+      i = qs.length; drawPips();
+      qbox.classList.add('hidden');
+      const total = qs.length, reward = right * 15;
+      const verdict = right === total ? ['A Flawless Report!', 'You shall be honored at court, and your name written in the royal chronicles!']
+        : right >= Math.ceil(total * 0.7) ? ['A Fine Report', 'You have served the Crown well. Your reward is well earned.']
+        : right >= Math.ceil(total / 2) ? ['An Acceptable Report', 'Some of your answers puzzled me. Study your Codex before your next voyage.']
+        : ['A Muddled Report', 'Did you sleep through the whole voyage? Read your Codex, Captain, and sail again!'];
+      say(`<div class="roy-score">${'★'.repeat(right)}<span style="opacity:.25">${'★'.repeat(total - right)}</span></div><div class="roy-verdict"><b>${verdict[0]}</b>“${verdict[1]}”</div>${right}/${total} correct · <span class="coin sm"></span> +${reward} ducats from the royal treasury`);
+      Sound.play(right >= Math.ceil(total * 0.7) ? 'rankup' : 'coin');
+      next.textContent = 'See Your Voyage Record';
+      next.onclick = () => { Sound.play('click'); hide('royal'); done({ right, total, reward }); };
+    };
+    next.onclick = () => { Sound.play('click'); ask(); };
+  }
+
   /* ---------------- Results -------------------------------------------- */
   function results(st, rewards, onDone) {
     const ex = st.ex;
@@ -422,15 +505,16 @@ const UI = (() => {
     $('resStars').innerHTML = [0, 1, 2].map(i => `<span class="${i < rewards.stars ? '' : 'off'}" style="animation-delay:${0.3 + i * 0.35}s">★</span>`).join('');
     const rc = $('resChart');
     Sail.drawChart(rc, { full: true });
-    const q = st.quizTotal ? Math.round(st.quizRight / st.quizTotal * 100) : 100;
+    const q = Math.round(rewards.quizFrac * 100);
     $('resGrid').innerHTML = `
       <div>Days at sea<b>${Math.floor(st.day) + 1}</b></div>
       <div>Pilot’s questions<b>${st.quizRight}/${st.quizTotal}</b></div>
+      <div>Report to the Crown<b>${rewards.report.right}/${rewards.report.total}</b></div>
       <div>Codex scrolls<b>${st.scrolls.length}/${ex.scrolls.length}</b></div>
       <div>Ducats earned<b>+${rewards.ducats}</b></div>
       <div>Experience<b>+${rewards.xp}</b></div>`;
     $('resEpilogue').innerHTML = `<b>What happened next:</b> ${ex.epilogue}`;
-    const stars = [`★ Voyage completed`, `${rewards.stars >= 2 ? '★' : '☆'} Answer 70% of the pilot’s questions correctly (you: ${q}%)`, `${rewards.stars >= 3 ? '★' : '☆'} Find 70% of the codex scrolls (you: ${st.scrolls.length}/${ex.scrolls.length})`];
+    const stars = [`★ Voyage completed`, `${rewards.stars >= 2 ? '★' : '☆'} Answer 70% of the pilot’s and the Crown’s questions correctly (you: ${q}%)`, `${rewards.stars >= 3 ? '★' : '☆'} Find 70% of the codex scrolls (you: ${st.scrolls.length}/${ex.scrolls.length})`];
     $('resRank').innerHTML = stars.join('<br>') + (rewards.rankUp ? `<br><br>🎖 <b>Promoted to ${rewards.rankUp}!</b>` : '');
     show('results');
     $('btnResDone').onclick = () => { Sound.play('click'); hide('results'); onDone(); };
@@ -468,7 +552,7 @@ const UI = (() => {
     refreshMenuStats, buildCards, openDossier, briefing, hudShow, hud, objective, bindCompass,
     toast, banner, unlockTerm, showCard, journal, directionChallenge,
     get challengeActive() { return challengeActive; }, challengePick(b) { if (challengeCb) challengeCb(b); },
-    openCodex, openShipyard, results, gameOver, bindSettings, rankFor, starsHTML, get selected() { return selected; },
+    openCodex, openShipyard, royalReport, results, gameOver, bindSettings, rankFor, starsHTML, get selected() { return selected; },
     CAPTAIN_NAMES,
   };
 })();

@@ -113,7 +113,7 @@ const Art = (() => {
     const hg = g.createLinearGradient(-W, 0, W, 0);
     hg.addColorStop(0, '#3e2412'); hg.addColorStop(0.5, '#8a5a32'); hg.addColorStop(1, '#3a2010');
     g.fillStyle = hg; g.fill(hull);
-    g.strokeStyle = '#1e1008'; g.lineWidth = 1.2; g.stroke(hull);
+    g.strokeStyle = o.gold ? '#e8b84a' : '#1e1008'; g.lineWidth = o.gold ? 2 : 1.2; g.stroke(hull);
     // deck
     g.save(); g.scale(0.8, 0.9);
     const dg = g.createLinearGradient(-W, 0, W, 0);
@@ -171,7 +171,8 @@ const Art = (() => {
         sp.lineTo(0, len * 0.45);
         sp.closePath();
         const sg = g.createLinearGradient(0, 0, bul, 0);
-        sg.addColorStop(0, '#fbf3df'); sg.addColorStop(1, '#d8c7a1');
+        if (o.gold) { sg.addColorStop(0, '#fff3c0'); sg.addColorStop(1, '#e0b44a'); }
+        else { sg.addColorStop(0, '#fbf3df'); sg.addColorStop(1, '#d8c7a1'); }
         g.fillStyle = sg; g.fill(sp);
         g.strokeStyle = 'rgba(60,40,20,0.7)'; g.lineWidth = 0.8; g.stroke(sp);
         // seams
@@ -193,7 +194,7 @@ const Art = (() => {
         const span = ml * 0.75 * reef, bul = -L * 0.12 * fill;
         const sp = new Path2D();
         sp.moveTo(-span / 2, 0); sp.quadraticCurveTo(0, bul * 2, span / 2, 0); sp.lineTo(span / 2 * 0.9, L * 0.03); sp.quadraticCurveTo(0, bul * 1.6 + L * 0.03, -span / 2 * 0.9, L * 0.03); sp.closePath();
-        g.fillStyle = '#efe3c6'; g.fill(sp); g.strokeStyle = 'rgba(60,40,20,0.7)'; g.lineWidth = 0.8; g.stroke(sp);
+        g.fillStyle = o.gold ? '#f3d27a' : '#efe3c6'; g.fill(sp); g.strokeStyle = 'rgba(60,40,20,0.7)'; g.lineWidth = 0.8; g.stroke(sp);
         if (o.cross !== false && mi === 1) {
           g.fillStyle = '#a3241b'; const cs = span * 0.12;
           g.fillRect(-cs * 0.2, bul * 1.2 - cs * 0.4, cs * 0.4, cs * 1.2); g.fillRect(-cs * 0.6, bul * 1.2 - cs * 0.05, cs * 1.2, cs * 0.35);
@@ -268,6 +269,11 @@ const Art = (() => {
     gama: { skin: '#dfae84', hair: '#2a201a', beard: 'long', hat: 'beret', hatColor: '#141212', coat: '#1c1c22', collar: '#ddd2b8', cross: true },
     magellan: { skin: '#e0b088', hair: '#2b2018', beard: 'full', hat: 'none', coat: '#6d6f74', collar: '#f1ebdc', armor: true, bald: true },
     elcano: { skin: '#e6b993', hair: '#5a3b22', beard: 'full', hat: 'cap', hatColor: '#4a2b16', coat: '#3e4a2e', collar: '#efe6d0' },
+    john2: { skin: '#e4b48c', hair: '#2e2118', beard: 'full', hat: 'crown', coat: '#7a1c18', collar: '#f0e4c6', royal: true },
+    manuel: { skin: '#e6b892', hair: '#5a3a20', beard: 'short', hat: 'crown', coat: '#1e3a6e', collar: '#f0e4c6', royal: true, longHair: true },
+    ferdinand: { skin: '#e3b28a', hair: '#3a2416', beard: 'none', hat: 'crown', coat: '#7a1c18', collar: '#f0e4c6', royal: true, longHair: true },
+    isabella: { skin: '#f0c9a6', hair: '#b5793e', beard: 'none', hat: 'crown', coat: '#3a2a6e', collar: '#f6efe0', royal: true, longHair: true, queen: true },
+    charles: { skin: '#ecc19c', hair: '#8a5a2a', beard: 'short', hat: 'crown', coat: '#22222a', collar: '#f6efe0', royal: true },
   };
   function portrait(g, id, size, o = {}) {
     const L = LOOKS[id] || LOOKS.dias;
@@ -392,6 +398,31 @@ const Art = (() => {
       g.strokeStyle = 'rgba(255,255,255,0.15)';
       for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(-26 + i * 13, -44); g.lineTo(-20 + i * 10, -68); g.stroke(); }
       g.strokeStyle = ink;
+    } else if (L.hat === 'crown') {
+      const cg = g.createLinearGradient(-36, -90, 36, -50);
+      cg.addColorStop(0, '#fff0a8'); cg.addColorStop(0.5, '#d9a63c'); cg.addColorStop(1, '#a8741c');
+      g.fillStyle = cg;
+      g.beginPath(); g.moveTo(-34, -48);
+      const pts = [[-34, -80], [-22, -64], [-11, -88], [0, -66], [11, -88], [22, -64], [34, -80], [34, -48]];
+      for (const [px, py] of pts) g.lineTo(px, py);
+      g.closePath(); g.fill(); g.stroke();
+      g.fillRect(-35, -56, 70, 10); g.strokeRect(-35, -56, 70, 10);
+      const gems = ['#b3261e', '#1f5fa8', '#2d8a4a', '#1f5fa8', '#b3261e'];
+      gems.forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(-24 + i * 12, -51, 3, 0, 7); g.fill(); });
+      for (const [px, py] of [[-34, -80], [-11, -88], [11, -88], [34, -80]]) { g.fillStyle = '#fff6d0'; g.beginPath(); g.arc(px, py, 3.2, 0, 7); g.fill(); g.stroke(); }
+      if (L.queen) {
+        g.fillStyle = 'rgba(250,245,235,0.55)';
+        g.beginPath(); g.moveTo(-36, -46); g.bezierCurveTo(-60, -10, -56, 30, -46, 46); g.lineTo(-38, 40); g.bezierCurveTo(-46, 10, -42, -20, -30, -44); g.closePath(); g.fill();
+        g.beginPath(); g.moveTo(36, -46); g.bezierCurveTo(60, -10, 56, 30, 46, 46); g.lineTo(38, 40); g.bezierCurveTo(46, 10, 42, -20, 30, -44); g.closePath(); g.fill();
+      }
+    }
+    if (L.royal) {
+      // ermine trim on the shoulders
+      g.fillStyle = '#f7f2e6';
+      g.beginPath(); g.moveTo(-96, 100); g.bezierCurveTo(-90, 66, -62, 52, -30, 46); g.lineTo(-24, 58); g.bezierCurveTo(-56, 64, -78, 76, -80, 100); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(96, 100); g.bezierCurveTo(90, 66, 62, 52, 30, 46); g.lineTo(24, 58); g.bezierCurveTo(56, 64, 78, 76, 80, 100); g.closePath(); g.fill();
+      g.fillStyle = '#1a1414';
+      for (const [px, py] of [[-70, 78], [-50, 62], [-84, 92], [70, 78], [50, 62], [84, 92]]) { g.beginPath(); g.ellipse(px, py, 2, 3.5, 0, 0, 7); g.fill(); }
     }
     g.restore();
     // frame
@@ -738,5 +769,63 @@ const Art = (() => {
     g.restore();
   }
 
-  return { parchment, compassRose, shipTop, shipSide, dhow, portrait, flag, scene, catIcon, whaleTop, dolphin, bird, cloud, padrao, palm };
+  /* ---------------- Royal throne room -------------------------------- */
+  function throneRoom(c, flagKind, n = 1) {
+    const g = c.getContext('2d'), W = c.width, H = c.height;
+    const wall = g.createLinearGradient(0, 0, 0, H);
+    wall.addColorStop(0, '#3a2418'); wall.addColorStop(0.65, '#6a4428'); wall.addColorStop(1, '#2a180e');
+    g.fillStyle = wall; g.fillRect(0, 0, W, H);
+    const fy = H * 0.66;
+    // arches
+    g.strokeStyle = 'rgba(240,210,150,0.35)'; g.lineWidth = 3;
+    for (let i = 0; i < 5; i++) {
+      const x = W * (0.1 + i * 0.2), aw = W * 0.07;
+      g.fillStyle = 'rgba(20,10,5,0.45)';
+      g.beginPath(); g.moveTo(x - aw, fy); g.lineTo(x - aw, H * 0.28); g.arc(x, H * 0.28, aw, Math.PI, 0); g.lineTo(x + aw, fy); g.closePath(); g.fill(); g.stroke();
+      const lg = g.createRadialGradient(x, H * 0.3, 2, x, H * 0.3, aw * 1.6);
+      lg.addColorStop(0, 'rgba(255,220,150,0.35)'); lg.addColorStop(1, 'rgba(255,220,150,0)');
+      g.fillStyle = lg; g.fillRect(x - aw * 2, 0, aw * 4, fy);
+    }
+    // floor tiles in perspective
+    g.fillStyle = '#d8c8a8'; g.fillRect(0, fy, W, H - fy);
+    for (let r = 0; r < 8; r++) {
+      const y0 = fy + (H - fy) * Math.pow(r / 8, 1.6), y1 = fy + (H - fy) * Math.pow((r + 1) / 8, 1.6);
+      for (let k = -12; k < 12; k++) {
+        if ((k + r) % 2) continue;
+        const sx = (t, y) => W / 2 + (k + t) * (W * 0.05) * (0.4 + (y - fy) / (H - fy) * 1.6);
+        g.fillStyle = '#2a2018';
+        g.beginPath(); g.moveTo(sx(0, y0), y0); g.lineTo(sx(1, y0), y0); g.lineTo(sx(1, y1), y1); g.lineTo(sx(0, y1), y1); g.closePath(); g.fill();
+      }
+    }
+    // red carpet
+    g.fillStyle = '#8a1e16';
+    g.beginPath(); g.moveTo(W * 0.46, fy); g.lineTo(W * 0.54, fy); g.lineTo(W * 0.66, H); g.lineTo(W * 0.34, H); g.closePath(); g.fill();
+    g.strokeStyle = '#e0b04a'; g.lineWidth = 2; g.stroke();
+    // banners
+    for (const bx of [W * 0.2, W * 0.8]) {
+      g.fillStyle = '#5a1810'; g.fillRect(bx - 34, H * 0.08, 68, H * 0.42);
+      flag(g, flagKind, bx - 26, H * 0.12, 52, 40);
+      g.fillStyle = '#5a1810';
+      g.beginPath(); g.moveTo(bx - 34, H * 0.5); g.lineTo(bx, H * 0.58); g.lineTo(bx + 34, H * 0.5); g.closePath(); g.fill();
+      g.strokeStyle = '#e0b04a'; g.lineWidth = 2; g.strokeRect(bx - 34, H * 0.08, 68, H * 0.42);
+    }
+    // throne(s) on a dais
+    g.fillStyle = '#4a2c18'; g.fillRect(W * 0.32, fy - 14, W * 0.36, 16);
+    g.fillStyle = '#6a4024'; g.fillRect(W * 0.35, fy - 26, W * 0.30, 14);
+    const tw = 60;
+    for (let i = 0; i < n; i++) {
+      const tx = W / 2 + (n === 1 ? 0 : (i ? 46 : -46));
+      g.fillStyle = '#b8862e'; g.strokeStyle = '#4a2a0a'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(tx - tw / 2, fy - 26); g.lineTo(tx - tw / 2, fy - 130); g.quadraticCurveTo(tx, fy - 170, tx + tw / 2, fy - 130); g.lineTo(tx + tw / 2, fy - 26); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#8a1e16'; g.fillRect(tx - tw / 2 + 8, fy - 120, tw - 16, 80);
+      g.fillStyle = '#e8c860'; g.beginPath(); g.arc(tx, fy - 150, 6, 0, 7); g.fill();
+    }
+    // light and vignette
+    const vg = g.createRadialGradient(W / 2, H * 0.45, H * 0.2, W / 2, H * 0.5, W * 0.7);
+    vg.addColorStop(0, 'rgba(255,220,160,0.12)'); vg.addColorStop(1, 'rgba(10,5,0,0.6)');
+    g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    g.strokeStyle = '#3b2a17'; g.lineWidth = 3; g.strokeRect(1.5, 1.5, W - 3, H - 3);
+  }
+
+  return { throneRoom, parchment, compassRose, shipTop, shipSide, dhow, portrait, flag, scene, catIcon, whaleTop, dolphin, bird, cloud, padrao, palm };
 })();
