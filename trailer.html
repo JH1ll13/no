@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beyond the Horizon Trailer</title>
+<meta name="description" content="Cinematic trailer for Beyond the Horizon, the Age of Exploration sailing game.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f2e6c8; --gold: #e2bd6a; --bg: #000; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); overflow: hidden; font-family: "IM Fell English", Georgia, serif; }
+  #stage { position: fixed; inset: 0; display: grid; place-items: center; }
+  canvas { width: min(100vw, calc(100vh * 16 / 9)); height: auto; aspect-ratio: 16 / 9; display: block; background: #000; }
+  .overlay { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, rgba(90, 55, 20, 0.55), rgba(0, 0, 0, 0.92)); transition: opacity .5s; }
+  .overlay[hidden] { display: none; }
+  .panel { text-align: center; padding: 24px max(16px, env(safe-area-inset-left, 0px)); }
+  .panel h1 { font-family: "Cinzel Decorative", "Cinzel", Georgia, serif; font-size: clamp(30px, 6vw, 72px); margin: 0 0 8px; color: var(--gold); letter-spacing: .03em; text-wrap: balance; text-shadow: 0 4px 30px rgba(0, 0, 0, .8); }
+  .panel p { font-size: clamp(16px, 2.2vw, 22px); margin: 0 0 28px; opacity: .85; }
+  .btn { font-family: "Cinzel", Georgia, serif; font-weight: 700; font-size: clamp(16px, 2vw, 22px); letter-spacing: .12em; color: #2a1906; background: linear-gradient(#f6dc96, #c8963f); border: 2px solid #f7e6b5; border-radius: 999px; padding: 14px 34px; cursor: pointer; box-shadow: 0 10px 40px rgba(0, 0, 0, .6), 0 0 30px rgba(226, 189, 106, .35); text-decoration: none; display: inline-block; margin: 6px; }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: rgba(242, 230, 200, .5); box-shadow: none; }
+  .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  #hud { position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; opacity: 0; transition: opacity .4s; }
+  body:hover #hud, #hud:focus-within { opacity: 1; }
+  #hud button { font: 700 13px "Cinzel", Georgia, serif; letter-spacing: .1em; color: var(--ink); background: rgba(0, 0, 0, .55); border: 1px solid rgba(242, 230, 200, .4); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1920" height="1080" aria-label="Trailer animation"></canvas></div>
+<div class="overlay" id="start">
+  <div class="panel">
+    <h1>Beyond the Horizon</h1>
+    <p>The trailer. Turn your sound up.</p>
+    <button class="btn" id="play" disabled>Loading…</button>
+  </div>
+</div>
+<div class="overlay" id="end" hidden>
+  <div class="panel">
+    <h1>Beyond the Horizon</h1>
+    <p>Choose your captain.</p>
+    <a class="btn" href="index.html">Play the game</a>
+    <button class="btn ghost" id="replay">Watch again</button>
+  </div>
+</div>
+<div id="hud"><button id="fs">Full screen</button></div>
+
+<script src="js/geo-data.js"></script>
+<script src="js/util.js"></script>
+<script src="js/content.js"></script>
+<script src="js/world.js"></script>
+<script src="js/art.js"></script>
+<script src="js/oldmap.js"></script>
+<script src="js/trailer.js"></script>
+<script>
+(() => {
+  const c = document.getElementById('c'), g = c.getContext('2d');
+  const playBtn = document.getElementById('play'), start = document.getElementById('start'), end = document.getElementById('end');
+  const exportMode = location.search.includes('export');
+  // The score is pre-rendered from Trailer.score() (see js/trailer.js) so it plays
+  // smoothly on any device; if the file cannot load, it is synthesized live instead.
+  const AUDIO_OFFSET = 0.05;
+  const music = new Audio('audio/trailer-score.mp3');
+  music.preload = 'auto';
+  let musicOk = true;
+  music.addEventListener('error', () => { musicOk = false; });
+  let ac = null, t0 = 0, running = false, mode = 'clock';
+
+  Trailer.ready().then(() => {
+    Trailer.draw(g, 0.0);
+    playBtn.disabled = false; playBtn.textContent = '▶  Play trailer';
+    if (exportMode) { start.hidden = true; window.trailerReady = true; }
+  });
+
+  function play() {
+    start.hidden = true; end.hidden = true;
+    if (ac) { ac.close(); ac = null; }
+    mode = 'clock'; t0 = performance.now() / 1000 + 0.15;
+    if (musicOk) {
+      music.currentTime = 0;
+      music.play().then(() => { mode = 'music'; }).catch(() => { musicOk = false; synth(); });
+    } else synth();
+    running = true;
+    requestAnimationFrame(loop);
+  }
+  function synth() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      ac = new AC(); t0 = ac.currentTime + 0.15; Trailer.score(ac, ac.destination, t0); mode = 'synth';
+    } catch (e) { mode = 'clock'; }
+  }
+  function now() {
+    if (mode === 'music') return music.currentTime - AUDIO_OFFSET;
+    if (mode === 'synth') return ac.currentTime - t0;
+    return performance.now() / 1000 - t0;
+  }
+  function loop() {
+    if (!running) return;
+    const t = Math.max(0, now());
+    Trailer.draw(g, Math.min(t, Trailer.DUR - 0.01));
+    if (t >= Trailer.DUR - 0.05 || (mode === 'music' && music.ended)) { running = false; end.hidden = false; return; }
+    requestAnimationFrame(loop);
+  }
+  playBtn.addEventListener('click', play);
+  document.getElementById('replay').addEventListener('click', play);
+  document.getElementById('fs').addEventListener('click', () => {
+    const el = document.documentElement;
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  });
+  window.addEventListener('keydown', e => { if (e.key === ' ' && !start.hidden) { e.preventDefault(); if (!playBtn.disabled) play(); } });
+})();
+</script>
+</body>
+</html>

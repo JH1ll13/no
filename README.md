@@ -61,6 +61,14 @@ A whole-class game for the projector, opened with the **⚔ Class Race** button 
   - It adds nine Codex terms and 200 ducats.
 - **Saving:** progress is saved in the browser automatically. Voyages save at every landmark, so a student can stop at the end of class and continue next time.
 
+## Trailer
+
+`trailer.html` plays an 80-second cinematic trailer that introduces the four captains, for opening the unit or building excitement before students play. Press Play with the sound up; Full screen is in the bottom-right corner.
+
+- Every frame is drawn live from the game's own art (portraits, ships, the 1490 map), so there is no video file to host.
+- The original score (a swashbuckling D-minor piece in 6/8) is synthesized by `Trailer.score()` in `js/trailer.js` and pre-rendered to `audio/trailer-score.mp3` so it plays smoothly on any device. If the file is missing, the page synthesizes the music live.
+- To make an MP4 copy for showing offline, render the frames with `Trailer.draw(g, t)` and the audio with `Trailer.renderAudio()`, then join them with ffmpeg. The video is not stored in the repository to keep it small.
+
 ## Practice deck
 
 `practice/Beyond-the-Horizon-Practice.pptx` is a 40-slide PowerPoint that holds all of the practice for the unit, illustrated with art from the game. Students type their answers into the dashed boxes.
